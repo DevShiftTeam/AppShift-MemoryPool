@@ -63,16 +63,44 @@ namespace CPPShift {
 #endif
             SMemoryBlockHeader* createMemoryBlock(size_t block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
         public:
+            /**
+             * MemoryPool Constructor
+             * 
+             * @param max_block_size Maximum size for a block (MEMORYPOOL_BLOCK_MAX_SIZE by default)
+             * 
+             * @exception EMemoryErrors::CANNOT_CREATE_BLOCK If cannot allocate block in the heap
+             * @exception EMemoryErrors::EXCEEDS_MAX_SIZE If size requested is bigger than MEMORYPOOL_BLOCK_MAX_SIZE and MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE is not defined
+             * 
+             */
             MemoryPool(size_t max_block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
             ~MemoryPool();
 
-            // Allocate memory in the pool
+            /**
+             * Allocates memory in the pool
+             * 
+             * @param size_t number of instances of T to free
+             * 
+             * @returns Pointer to the start of the allocated space
+             */
             template<typename T>
             T* allocate(size_t instances = 1);
-            // Reallocate memory in the pool
+
+            /**
+             * Reallocates memory in the pool
+             * 
+             * @param memory_unit_ptr Pointer to the previously allocated space
+             * @param size_t number of instances of T to free
+             * 
+             * @returns Pointer to the start of the allocated space
+             */
             template<typename T>
             T* rellocate(T* memory_unit_ptr, size_t instances = 1);
-            // Remove memory unit from the pool
+            
+            /**
+             * Remove memory unit from the pool
+             * 
+             * @param memory_unit_ptr Pointer to the allocated space to remove
+             */
             void remove(void* memory_unit_ptr);
         };
 
