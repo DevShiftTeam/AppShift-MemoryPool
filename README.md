@@ -34,7 +34,7 @@ Each block contains a block header the size of 24 bytes containing the following
  * `size_t offset;` - Offset in the block from which the memory is free (The block is filled in sequencial order)
  * `SMemoryBlockHeader* next;` - Pointer to the next block
 
-When a block is fully filled the MemoryPool create a new block and relates it to the previous block.
+When a block is fully filled the MemoryPool creates a new block and relates it to the previous block.
 
 When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 or 24 bytes long (Depending if `MEMORYPOOL_REUSE_GARBAGE` is on, see [Macros](#macros)) and contains the following data:
  * `size_t length;` - The length in bytes of the allocated space
