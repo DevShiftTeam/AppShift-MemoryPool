@@ -30,7 +30,8 @@ namespace CPPShift {
         enum class EMemoryErrors {
             CANNOT_CREATE_BLOCK,
             OUT_OF_POOL,
-            EXCEEDS_MAX_SIZE
+            EXCEEDS_MAX_SIZE,
+            CANNOT_CREATE_BLOCK_CHAIN
         };
 
         // Header for a single memory block
@@ -94,7 +95,7 @@ namespace CPPShift {
              * @returns Pointer to the start of the allocated space
              */
             template<typename T>
-            T* rellocate(T* memory_unit_ptr, size_t instances = 1);
+            T* reallocate(T* memory_unit_ptr, size_t instances = 1);
             
             /**
              * Remove memory unit from the pool
@@ -125,78 +126,56 @@ namespace CPPShift {
                 }
             }
 #endif
+            SMemoryBlockHeader* block = this->currentBlock;
 
-            // Get the current offest
-            size_t offset = this->currentBlock->offset;
-
-            // Find a free or new block if necessary
-            if (offset + full_length >= this->currentBlock->block_size - sizeof(SMemoryBlockHeader)) {
-                SMemoryBlockHeader* iter = this->firstBlock;
-                offset = iter->offset;
-
-                // Run through existing blocks
-                while (offset + full_length >= iter->block_size - sizeof(SMemoryBlockHeader)) {
-                    // Skip current block
-                    if (iter->next == this->currentBlock) iter = iter->next;
-
-                    // Create new block if free space not found
-                    if (iter->next == nullptr) {
-                        try {
-#ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
-                            iter->next = this->createMemoryBlock(this->maxBlockSize);
-#else
-                            iter->next = this->createMemoryBlock(
-                                full_length + sizeof(SMemoryBlockHeader) > this->maxBlockSize ?
-                                full_length + sizeof(SMemoryBlockHeader) : this->maxBlockSize
-                            );
-#endif
-                            this->currentBlock = iter->next;
-                            offset = this->currentBlock->offset;
-                            break;
-                        }
-                        catch (EMemoryErrors e) {
-                            throw e;
-                        }
-                    }
-
-                    iter = iter->next;
-                }
+            // New block if necessary
+            if (block->offset + full_length > block->block_size - sizeof(SMemoryBlockHeader)) {
+                // If current not free, create new block
+                block->next = this->createMemoryBlock(
+                    block->offset + full_length > MEMORYPOOL_BLOCK_MAX_SIZE
+                        ? block->offset + full_length : MEMORYPOOL_BLOCK_MAX_SIZE
+                );
+                this->currentBlock = block->next;
+                block = block->next;
             }
 
             // Set memory unit header
             SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
-                reinterpret_cast<char*>(this->currentBlock) + sizeof(SMemoryBlockHeader) + offset
+                reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset
                 );
             unit->length = length;
             unit->is_deleted = false;
 #ifdef MEMORYPOOL_REUSE_GARBAGE
             unit->prev_deleted = nullptr;
 #endif
-            this->currentBlock->offset += full_length;
+            block->offset += full_length;
             // return offset of new memory unit
             return reinterpret_cast<T*>(reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader));
         }
 
         template<typename T>
-        inline T* MemoryPool::rellocate(T* memory_unit_ptr, size_t instances)
+        inline T* MemoryPool::reallocate(T* memory_unit_ptr, size_t instances)
         {
             if (memory_unit_ptr == nullptr) return this->allocate<T>(instances);
-            else if (instances <= 0) {
+            else if (instances == 0) {
                 this->remove(memory_unit_ptr);
                 return nullptr;
             }
+
             size_t length = sizeof(T) * instances;
 
             // Find unit
             SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
                 reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader)
-                );
+            );
+
             // Check for current block
             SMemoryBlockHeader* block = this->currentBlock;
             // Find in other blocks
             if (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
                 || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
             {
+                if (block == this->firstBlock) throw EMemoryErrors::OUT_OF_POOL;
                 block = this->firstBlock;
                 while (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
                     || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
@@ -206,6 +185,7 @@ namespace CPPShift {
                     if (block == this->currentBlock) block = block->next;
                 }
             }
+
             // If unit is the last in the block
             if (reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length
                 == reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset)

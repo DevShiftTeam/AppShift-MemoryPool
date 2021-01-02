@@ -28,16 +28,16 @@ namespace CPPShift::Memory {
         // Check if size exceeds pool size
         if (block_size > MEMORYPOOL_BLOCK_MAX_SIZE) throw EMemoryErrors::EXCEEDS_MAX_SIZE;
 #endif
-        // Create block
         SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(malloc(block_size));
         if (block == NULL) throw EMemoryErrors::CANNOT_CREATE_BLOCK;
         // Default metadata
         memset(block, 0, block_size);
         block->block_size = block_size;
-        block->next = nullptr;
         block->offset = 0;
+        block->next = nullptr;
 
         return block;
+
     }
 
     MemoryPool::MemoryPool(size_t max_block_size)
@@ -74,9 +74,12 @@ namespace CPPShift::Memory {
     void MemoryPool::remove(void* memory_unit_ptr)
     {
         // Find unit
-        SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader));
-        // Check for current block
+        SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
+            reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader)
+        );
+
         SMemoryBlockHeader* block = this->currentBlock;
+
         // Find in other blocks
         if (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
             || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
@@ -90,6 +93,7 @@ namespace CPPShift::Memory {
                 if (block == this->currentBlock) block = block->next;
             }
         }
+
         // If last get block offset back
         if (reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length
             == reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset)
