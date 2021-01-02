@@ -61,7 +61,7 @@ namespace CPPShift {
 	{
 		int add_length = 0;
 		while (str[add_length] != '\0') add_length++;
-		this->start = this->mp->rellocate<char>(this->start, this->length + add_length);
+		this->start = this->mp->reallocate<char>(this->start, this->length + add_length);
 		memcpy(this->start + this->length, str, add_length);
 		this->length += add_length;
 		return *this;
@@ -69,7 +69,7 @@ namespace CPPShift {
 
 	String& String::operator+=(const String& str)
 	{
-		this->start = this->mp->rellocate<char>(this->start, this->length + str.size());
+		this->start = this->mp->reallocate<char>(this->start, this->length + str.size());
 		memcpy(this->start + this->length, str.data(), str.size());
 		this->length += str.size();
 		return *this;
