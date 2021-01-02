@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#define MEMORYPOOL_SPEED_MODE
 
 #ifndef MEMORYPOOL_BLOCK_MAX_SIZE
 #define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
