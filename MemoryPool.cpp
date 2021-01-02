@@ -34,9 +34,7 @@ namespace CPPShift::Memory {
         memset(block, 0, block_size);
         block->block_size = block_size;
         block->offset = 0;
-#ifndef MEMORYPOOL_SPEED_MODE
         block->next = nullptr;
-#endif // !MEMORYPOOL_SPEED_MODE
 
         return block;
 
@@ -49,18 +47,9 @@ namespace CPPShift::Memory {
         if (max_block_size > MEMORYPOOL_BLOCK_MAX_SIZE) throw EMemoryErrors::EXCEEDS_MAX_SIZE;
 #endif
         try {
-#ifdef MEMORYPOOL_SPEED_MODE
-            size_t reserve_size = sizeof(SMemoryBlockHeader*) * MEMORYPOOL_BLOCK_RESERVE;
-            this->blockChain = reinterpret_cast<SMemoryBlockHeader**>(malloc(reserve_size));
-            if (this->blockChain == NULL) throw EMemoryErrors::CANNOT_CREATE_BLOCK_CHAIN;
-            memset(this->blockChain, 0, reserve_size);
-            this->blockChain[0] = this->createMemoryBlock(max_block_size);
-            this->lastBlockIndex = 0;
-#else
             this->maxBlockSize = max_block_size;
             this->firstBlock = this->createMemoryBlock(max_block_size);
             this->currentBlock = this->firstBlock;
-#endif
 #ifdef MEMORYPOOL_REUSE_GARBAGE
             this->lastDeletedUnit = nullptr;
 #endif
@@ -73,11 +62,6 @@ namespace CPPShift::Memory {
     MemoryPool::~MemoryPool()
     {
         // Free all blocks
-#ifdef MEMORYPOOL_SPEED_MODE
-        for (size_t i = 0; i <= this->lastBlockIndex; i++)
-            free(this->blockChain[i]);
-        free(this->blockChain);
-#else
         SMemoryBlockHeader* lastBlock = this->firstBlock;
         while (lastBlock->next != nullptr) {
             SMemoryBlockHeader* tempPtr = lastBlock->next;
@@ -85,7 +69,6 @@ namespace CPPShift::Memory {
             lastBlock = tempPtr;
         }
         free(lastBlock);
-#endif
     }
 
     void MemoryPool::remove(void* memory_unit_ptr)
@@ -95,19 +78,6 @@ namespace CPPShift::Memory {
             reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader)
         );
 
-#ifdef MEMORYPOOL_SPEED_MODE
-        SMemoryBlockHeader* block = nullptr;
-        for (size_t i = this->lastBlockIndex; i >= 0; i--) {
-            if (reinterpret_cast<char*>(unit) + unit->length <= reinterpret_cast<char*>(this->blockChain[i]) + this->blockChain[i]->block_size
-                && reinterpret_cast<char*>(unit) >= reinterpret_cast<char*>(this->blockChain[i]) + sizeof(SMemoryBlockHeader))
-            {
-                block = this->blockChain[i];
-                break;
-            }
-            if (i == 0) break; // Avoid infinite loop
-        }
-        if(block == nullptr) throw EMemoryErrors::OUT_OF_POOL;
-#else
         SMemoryBlockHeader* block = this->currentBlock;
 
         // Find in other blocks
@@ -123,7 +93,7 @@ namespace CPPShift::Memory {
                 if (block == this->currentBlock) block = block->next;
             }
         }
-#endif
+
         // If last get block offset back
         if (reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length
             == reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset)
