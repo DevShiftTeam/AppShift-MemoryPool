@@ -31,7 +31,7 @@ namespace CPPShift {
 		memcpy(this->start, str, this->length);
 	}
 
-	String::~String() { this->mp->remove(this->start); }
+	String::~String() { /*this->mp->remove(this->start);*/ }
 
 	char* String::data() const { return this->start; }
 
