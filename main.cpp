@@ -18,7 +18,6 @@
  * @author Sapir Shemer
  */
 
-#define MEMORYPOOL_SPEED_MODE
 #include <iostream>
 #include "MemoryPool.h"
 #include "String.h"
