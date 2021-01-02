@@ -180,6 +180,7 @@ namespace CPPShift {
             if (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
                 || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
             {
+                if (block == this->firstBlock) throw EMemoryErrors::OUT_OF_POOL;
                 block = this->firstBlock;
                 while (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
                     || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
