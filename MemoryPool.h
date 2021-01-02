@@ -24,11 +24,6 @@
 #define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
 #endif
 
-#ifdef MEMORYPOOL_SPEED_MODE
-#define MEMORYPOOL_BLOCK_RESERVE 20
-#endif
-
-
 namespace CPPShift {
     namespace Memory {
         // Simple error collection for memory pool
