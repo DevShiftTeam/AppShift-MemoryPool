@@ -19,7 +19,6 @@
  */
 
 #pragma once
-#define MEMORYPOOL_SPEED_MODE
 
 #ifndef MEMORYPOOL_BLOCK_MAX_SIZE
 #define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
@@ -177,34 +176,7 @@ namespace CPPShift {
                         ? block->offset + full_length : MEMORYPOOL_BLOCK_MAX_SIZE
                 );
                 this->currentBlock = block->next;
-                SMemoryBlockHeader* block = this->firstBlock;
-
-                // Run through existing blocks
-                while (block->offset + full_length >= block->block_size - sizeof(SMemoryBlockHeader)) {
-                    // Skip current block
-                    if (block->next == this->currentBlock) block = block->next;
-
-                    // Create new block if free space not found
-                    if (block->next == nullptr) {
-                        try {
-#ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
-                            block->next = this->createMemoryBlock(this->maxBlockSize);
-#else
-                            block->next = this->createMemoryBlock(
-                                full_length + sizeof(SMemoryBlockHeader) > this->maxBlockSize ?
-                                full_length + sizeof(SMemoryBlockHeader) : this->maxBlockSize
-                            );
-#endif
-                            this->currentBlock = block->next;
-                            break;
-                        }
-                        catch (EMemoryErrors e) {
-                            throw e;
-                        }
-                    }
-
-                    block = block->next;
-                }
+                block = block->next;
             }
 #endif // !MEMORYPOOL_SPEED_MODE
 
