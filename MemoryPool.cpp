@@ -22,7 +22,7 @@
 #include <memory>
 
 namespace CPPShift::Memory {
-    SMemoryBlockHeader* MemoryPool::createMemoryBlock(size_t block_size)
+    SMemoryBlockHeader* MemoryPool::createMemoryBlock(SIZE block_size)
     {
 #ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
         // Check if size exceeds pool size
@@ -40,7 +40,7 @@ namespace CPPShift::Memory {
         return block;
     }
 
-    MemoryPool::MemoryPool(size_t max_block_size)
+    MemoryPool::MemoryPool(SIZE max_block_size)
     {
 #ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
         // Check if size exceeds pool size
