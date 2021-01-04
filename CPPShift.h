@@ -1,17 +1,17 @@
 #pragma once
 
-// Check windows
-#if _WIN32 || _WIN64
-#if !_WIN64
+/*
+ * Architecture independent bit size check
+ * Source: https://stackoverflow.com/a/32717129/3761616
+ */
+#include <cstdint>
+#if INTPTR_MAX == INT64_MAX
+// 64-bit
+#elif INTPTR_MAX == INT32_MAX
+// 32-bit
 #define CPPSHIFT_32BIT_MODE
-#endif
-#endif
-
-// Check GCC
-#if __GNUC__
-#if !(__x86_64__ && __ppc64__)
-#define CPPSHIFT_32BIT_MODE
-#endif
+#else
+#error Unknown pointer size or missing size macros!
 #endif
 
 #ifndef CPPSHIFT_32BIT_MODE
