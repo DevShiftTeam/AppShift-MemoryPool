@@ -29,17 +29,17 @@ namespace CPPShift {
             // Check if size exceeds pool size
             if (block_size > MEMORYPOOL_BLOCK_MAX_SIZE) throw EMemoryErrors::EXCEEDS_MAX_SIZE;
 #endif
-            // Create block
-            SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(malloc(block_size));
-            if (block == NULL) throw EMemoryErrors::CANNOT_CREATE_BLOCK;
-            // Default metadata
-            memset(block, 0, block_size);
-            block->block_size = block_size;
-            block->next = nullptr;
-            block->offset = 0;
+        SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(malloc(block_size));
+        if (block == NULL) throw EMemoryErrors::CANNOT_CREATE_BLOCK;
+        // Default metadata
+        memset(block, 0, block_size);
+        block->block_size = block_size;
+        block->offset = 0;
+        block->next = nullptr;
 
-            return block;
-        }
+        return block;
+
+    }
 
         MemoryPool::MemoryPool(SIZE max_block_size)
         {
