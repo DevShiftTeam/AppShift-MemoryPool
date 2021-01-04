@@ -18,7 +18,7 @@ To use the memory pool features you just need to copy the [MemoryPool.cpp](Memor
  * _Create a memory pool_: `CPPShift::Memory::MemoryPool mp = CPPShift::Memory::MemoryPool();` Should be created to use the features.
  * _Allocate space_: `Type* allocated = mp->allocate<Type>(instances);` Where `Type` is the object\primitive type to create and `instances` is a size_t representing the amount of `Type`s to create.
  * _Dellocate space_: `mp->remove(allocated)` Remove an allocated space
- * _Rellocate space_: `Type* allocated = mp->rellocate<Type>(allocated, instances);` Rellocate a pre-allocated space, will copy the previous values to the new space.
+ * _Rellocate space_: `Type* allocated = mp->reallocate<Type>(allocated, instances);` Rellocate a pre-allocated space, will copy the previous values to the new space.
 
 ## Macros
 There are some helpful macros available to indicate how you want the MemoryPool to manage your memory allocations.
