@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#include "CPPShift.h"
 
 #ifndef MEMORYPOOL_BLOCK_MAX_SIZE
 #define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
@@ -36,14 +37,14 @@ namespace CPPShift {
 
         // Header for a single memory block
         struct SMemoryBlockHeader {
-            size_t block_size;
-            size_t offset;
+            SIZE block_size;
+            SIZE offset;
             SMemoryBlockHeader* next; // The next block
         };
 
         // Header of a memory unit in the pool holding important metadata
         struct SMemoryUnitHeader {
-            size_t length;
+            SIZE length;
 #ifdef MEMORYPOOL_REUSE_GARBAGE
             SMemoryUnitHeader* prev_deleted;
 #endif
@@ -53,7 +54,7 @@ namespace CPPShift {
         class MemoryPool {
         private:
             // Maximum block size
-            size_t maxBlockSize = MEMORYPOOL_BLOCK_MAX_SIZE;
+            SIZE maxBlockSize = MEMORYPOOL_BLOCK_MAX_SIZE;
             // The current block at use
             SMemoryBlockHeader* currentBlock;
             // The tail of the block chain
@@ -62,7 +63,7 @@ namespace CPPShift {
             // Holds the last deleted block - used for smart junk memory management
             SMemoryUnitHeader* lastDeletedUnit;
 #endif
-            SMemoryBlockHeader* createMemoryBlock(size_t block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
+            SMemoryBlockHeader* createMemoryBlock(SIZE block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
         public:
             /**
              * MemoryPool Constructor
@@ -73,29 +74,29 @@ namespace CPPShift {
              * @exception EMemoryErrors::EXCEEDS_MAX_SIZE If size requested is bigger than MEMORYPOOL_BLOCK_MAX_SIZE and MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE is not defined
              * 
              */
-            MemoryPool(size_t max_block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
+            MemoryPool(SIZE max_block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
             ~MemoryPool();
 
             /**
              * Allocates memory in the pool
              * 
-             * @param size_t number of instances of T to free
+             * @param SIZE number of instances of T to free
              * 
              * @returns Pointer to the start of the allocated space
              */
             template<typename T>
-            T* allocate(size_t instances = 1);
+            T* allocate(SIZE instances = 1);
 
             /**
              * Reallocates memory in the pool
              * 
              * @param memory_unit_ptr Pointer to the previously allocated space
-             * @param size_t number of instances of T to free
+             * @param SIZE number of instances of T to free
              * 
              * @returns Pointer to the start of the allocated space
              */
             template<typename T>
-            T* reallocate(T* memory_unit_ptr, size_t instances = 1);
+            T* reallocate(T* memory_unit_ptr, SIZE instances = 1);
             
             /**
              * Remove memory unit from the pool
@@ -106,11 +107,11 @@ namespace CPPShift {
         };
 
         template<typename T>
-        inline T* MemoryPool::allocate(size_t instances)
+        inline T* MemoryPool::allocate(SIZE instances)
         {
             if (instances <= 0) return nullptr;
-            size_t length = instances * sizeof(T);
-            size_t full_length = length + sizeof(SMemoryUnitHeader);
+            SIZE length = instances * sizeof(T);
+            SIZE full_length = length + sizeof(SMemoryUnitHeader);
 #ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
             // Check if size exceeds pool size
             if (full_length > this->maxBlockSize) throw EMemoryErrors::EXCEEDS_MAX_SIZE;
@@ -154,7 +155,7 @@ namespace CPPShift {
         }
 
         template<typename T>
-        inline T* MemoryPool::reallocate(T* memory_unit_ptr, size_t instances)
+        inline T* MemoryPool::reallocate(T* memory_unit_ptr, SIZE instances)
         {
             if (memory_unit_ptr == nullptr) return this->allocate<T>(instances);
             else if (instances == 0) {
@@ -162,7 +163,7 @@ namespace CPPShift {
                 return nullptr;
             }
 
-            size_t length = sizeof(T) * instances;
+            SIZE length = sizeof(T) * instances;
 
             // Find unit
             SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
