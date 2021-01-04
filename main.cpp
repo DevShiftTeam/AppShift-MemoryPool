@@ -18,7 +18,6 @@
  * @author Sapir Shemer
  */
 
-#define CPPSHIFT_32BIT_MODE
 #include <iostream>
 #include "MemoryPool.h"
 #include "String.h"

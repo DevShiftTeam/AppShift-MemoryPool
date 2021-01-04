@@ -95,11 +95,7 @@ namespace CPPShift {
              * @returns Pointer to the start of the allocated space
              */
             template<typename T>
-<<<<<<< Updated upstream
-            T* rellocate(T* memory_unit_ptr, size_t instances = 1);
-=======
             T* reallocate(T* memory_unit_ptr, SIZE instances = 1);
->>>>>>> Stashed changes
             
             /**
              * Remove memory unit from the pool
@@ -183,23 +179,15 @@ namespace CPPShift {
         }
 
         template<typename T>
-<<<<<<< Updated upstream
-        inline T* MemoryPool::rellocate(T* memory_unit_ptr, size_t instances)
-=======
         inline T* MemoryPool::reallocate(T* memory_unit_ptr, SIZE instances)
->>>>>>> Stashed changes
         {
             if (memory_unit_ptr == nullptr) return this->allocate<T>(instances);
             else if (instances <= 0) {
                 this->remove(memory_unit_ptr);
                 return nullptr;
             }
-<<<<<<< Updated upstream
-            size_t length = sizeof(T) * instances;
-=======
 
             SIZE length = sizeof(T) * instances;
->>>>>>> Stashed changes
 
             // Find unit
             SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
