@@ -19,7 +19,8 @@
  */
 
 #pragma once
-
+#include <cstddef>
+#include <memory>
 #ifndef MEMORYPOOL_BLOCK_MAX_SIZE
 #define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
 #endif
