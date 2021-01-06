@@ -167,22 +167,31 @@ namespace CPPShift {
 
             size_t length = sizeof(T) * instances;
 
-            // Find unit
+            // Find unit by moving 
             SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
                 reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader)
             );
 
             // Check for current block
             SMemoryBlockHeader* block = this->currentBlock;
+
+            // Avoids branch mispredictions by using a bitwise or
+            char out_right = reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size,
+                out_left = reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader);
+            bool out_of_block = out_right | out_left;
+            
             // Find in other blocks
-            if (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
-                || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
+            if (out_of_block)
             {
                 if (block == this->firstBlock) throw EMemoryErrors::OUT_OF_POOL;
                 block = this->firstBlock;
-                while (reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size
-                    || reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader))
+
+                while (out_of_block)
                 {
+                    out_right = reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size;
+                    out_left = reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader);
+                    out_of_block = out_right | out_left;
+
                     if (block->next == nullptr) throw EMemoryErrors::OUT_OF_POOL;
                     block = block->next;
                     if (block == this->currentBlock) block = block->next;
