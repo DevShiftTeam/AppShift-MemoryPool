@@ -1,5 +1,5 @@
 /**
- * Memory Pool v1.0.0
+ * CPPShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -24,7 +24,7 @@
 #include <time.h>
 
 int main() {
-    CPPShift::Memory::MemoryPool mp = CPPShift::Memory::MemoryPool();
+    CPPShift::Memory::MemoryPool * mp = CPPShift::Memory::MemoryPoolManager::create();
 
     clock_t t;
     long double stdavg = 0;
