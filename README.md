@@ -15,8 +15,8 @@ I hope this simple feature will help you increase your software's performance - 
 # Usage
 To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp), [MemoryPool.h](MemoryPool.h) & [MemoryPoolData.h](MemoryPoolData.h) files to your project. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
 
- * _Create a memory pool_: `CPPShift::Memory::MemoryPool mp = CPPShift::Memory::MemoryPoolManager::create();` Create a new memory pool structure and a first memory block.
- * _Allocate space_: `Type* allocated = (Type*) CPPShift::Memory::MemoryPoolManager::allocate(size);` Where `Type` is the object\primitive type to create and `size` is a size_t representing the amount memory to allocate, it is recommended to use `reinterpret_cast<Type*>()`.
+ * _Create a memory pool_: `CPPShift::Memory::MemoryPool * mp = CPPShift::Memory::MemoryPoolManager::create();` Create a new memory pool structure and a first memory block.
+ * _Allocate space_: `Type* allocated = (Type*) CPPShift::Memory::MemoryPoolManager::allocate(mp, size);` Where `Type` is the object\primitive type to create, `mp` is the memory pool structure address, and `size` is a size_t representing the amount memory to allocate, it is recommended to use `reinterpret_cast<Type*>()`.
  * _Dellocate space_: `CPPShift::Memory::MemoryPoolManager::free(allocated)` Remove an allocated space
  * _Rellocate space_: `Type* allocated = (Type*) CPPShift::Memory::MemoryPoolManager::reallocate(allocated, size);` Rellocate a pre-allocated space, will copy the previous values to the new memory allocated.
 
