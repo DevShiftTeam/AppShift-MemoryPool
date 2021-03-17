@@ -133,3 +133,11 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 #endif // MEMORYPOOL_REUSE_GARBAGE
 
 }
+
+void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) throw(std::bad_alloc) {
+	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
+}
+
+void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp) throw(std::bad_alloc) {
+	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
+}

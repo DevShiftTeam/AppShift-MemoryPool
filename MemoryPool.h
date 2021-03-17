@@ -72,3 +72,7 @@ namespace CPPShift::Memory {
 		static void free(void* unit_pointer_start);
 	};
 }
+
+// Override new operators to create with memory pool
+extern void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp);
+extern void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp);

@@ -26,7 +26,7 @@ namespace CPPShift {
 		this->mp = mp;
 		this->length = strlen(str);
 		this->start = nullptr;
-		this->start = (char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
+		this->start = new (mp) char[this->length]; //(char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
 		memcpy(this->start, str, this->length);
 	}
 
@@ -40,8 +40,7 @@ namespace CPPShift {
 	{
 		Memory::MemoryPoolManager::free(this->start);
 		this->length = strlen(str);
-		this->start = nullptr;
-		this->start = (char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
+		this->start = new (this->mp) char[this->length]; //(char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
 		memcpy(this->start, str, this->length);
 		return *this;
 	}
@@ -50,7 +49,7 @@ namespace CPPShift {
 	{
 		Memory::MemoryPoolManager::free(this->start);
 		this->length = str.size();
-		this->start = (char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
+		this->start = new (this->mp) char[this->length]; //(char*) Memory::MemoryPoolManager::allocate(this->mp, this->length);
 		memcpy(this->start, str.data(), this->length);
 		return *this;
 	}
