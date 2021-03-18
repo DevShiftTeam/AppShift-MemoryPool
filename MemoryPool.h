@@ -46,13 +46,24 @@ namespace CPPShift::Memory {
 
 		/**
 		 * Allocates memory in a pool
-		 * 
+		 *
 		 * @param MemoryPool* mp Memory pool to allocate memory in
 		 * @param size_t size Size to allocate in memory pool
-		 * 
+		 *
 		 * @returns void* Pointer to the newly allocate space
 		 */
 		static void* allocate(MemoryPool* mp, size_t size);
+
+
+		/**
+		 * Allocates memory in a pool without checking that memory pool is not null, this way is unsafe but faster and easier for the branch predictor to use
+		 *
+		 * @param MemoryPool* mp Memory pool to allocate memory in
+		 * @param size_t size Size to allocate in memory pool
+		 *
+		 * @returns void* Pointer to the newly allocate space
+		 */
+		static void* allocate_unsafe(MemoryPool* mp, size_t size);
 
 		/**
 		 * Re-allocates memory in a pool
