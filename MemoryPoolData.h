@@ -24,6 +24,8 @@
 #define MEMORYPOOL_DEFAULT_BLOCK_SIZE 1024 * 1024
 
 namespace CPPShift::Memory {
+    struct MemoryPool;
+
     // Simple error collection for memory pool
     enum class EMemoryErrors {
         CANNOT_CREATE_MEMORY_POOL,
@@ -37,7 +39,7 @@ namespace CPPShift::Memory {
     struct SMemoryBlockHeader {
         size_t blockSize;
         size_t offset;
-        void* mp_container;
+        MemoryPool* mp_container;
         SMemoryBlockHeader* next; // The next block
     };
 

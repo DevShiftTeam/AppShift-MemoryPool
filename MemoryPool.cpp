@@ -83,7 +83,7 @@ void* CPPShift::Memory::MemoryPoolManager::reallocate(void* unit_pointer_start, 
 	// Find unit
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(unit_pointer_start) - sizeof(SMemoryUnitHeader));
 	SMemoryBlockHeader* block = unit->container;
-	MemoryPool* mp = reinterpret_cast<MemoryPool*>(block->mp_container);
+	MemoryPool* mp = block->mp_container;
 
 	// If last in block && enough space in block, then reset length
 	if (reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset == reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length
@@ -114,6 +114,8 @@ void* CPPShift::Memory::MemoryPoolManager::reallocate(void* unit_pointer_start, 
 
 void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 {
+	if (unit_pointer_start == nullptr) return;
+
 	// Find unit
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(unit_pointer_start) - sizeof(SMemoryUnitHeader));
 	SMemoryBlockHeader* block = unit->container;
@@ -134,10 +136,10 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 
 }
 
-void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) throw(std::bad_alloc) {
+void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) {
 	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
 }
 
-void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp) throw(std::bad_alloc) {
+void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp) {
 	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
 }
