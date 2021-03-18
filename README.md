@@ -22,22 +22,23 @@ To use the memory pool features you just need to copy the [MemoryPool.cpp](Memor
 
 ## Macros
 There are some helpful macros available to indicate how you want the MemoryPool to manage your memory allocations.
- * `#define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024`: The MemoryPool allocates memory into blocks, each block can have a maximum size avalable to use - when it exceeds this size, the MemoryPool allocates a new block - use this macro to define the maximum size to give to each block. By default the value is `1024 * 1024` which is 1MB.
+ * `#define MEMORYPOOL_DEFAULT_BLOCK_SIZE 1024 * 1024`: The MemoryPool allocates memory into blocks, each block can have a maximum size avalable to use - when it exceeds this size, the MemoryPool allocates a new block - use this macro to define the maximum size to give to each block. By default the value is `1024 * 1024` which is 1MB.
  * `#define MEMORYPOOL_REUSE_GARBAGE`: Deleted space is not really deleted, it is only flagged as 'deleted' - to reuse deleted instances then define this macro and when allocations are requested the memory pool will search for the first big enough deleted block - decreases memory consumption but might effect performance depending on amount of deleted units and how far they are in memory from each other.
 
 # Methodology
 The MemoryPool is a structure pointing to the start of a chain of blocks, which size is by default `MEMORYPOOL_BLOCK_MAX_SIZE` macro (See [Macros](#macros)) or the size passed into the `CPPShift::Memory::MemoryPoolManager::create(size)` function. The MemoryPoolManager is a component holding the necessary function to work with the MemoryPool structure. What's also good is that you can also access the MemoryPool strcture directly if needed.
 
-Each block contains a block header the size of 24 bytes containing the following information:
+Each block contains a block header the size of 32 bytes containing the following information:
  * `size_t blockSize;` - Size of the block
  * `size_t offset;` - Offset in the block from which the memory is free (The block is filled in sequencial order)
- * `void* container;` - Pointer to the MemoryPool containing this block - this way it is easy to get information about the MemoryPool structure from the block itself
+ * `MemoryPool* mp_container;` - Pointer to the MemoryPool containing this block - this way it is easy to get information about the MemoryPool structure from the block itself
  * `SMemoryBlockHeader* next;` - Pointer to the next block
 
 When a block is fully filled the MemoryPool creates a new block and relates it to the previous block.
 
-When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 or 24 bytes long (Depending if `MEMORYPOOL_REUSE_GARBAGE` is on, see [Macros](#macros)) and contains the following data:
+When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 or 32 bytes long (Depending if `MEMORYPOOL_REUSE_GARBAGE` is on, see [Macros](#macros)) and contains the following data:
  * `size_t length;` - The length in bytes of the allocated space
+ * `SMemoryBlockHeader* container` - Block which this unit belongs to
  * `bool isDeleted;` - A flag indicating if the memory unit got deleted
  * `SMemoryUnitHeader* prevDeleted;` - Pointer to the previous deleted memory unit - only if the `MEMORYPOOL_REUSE_GARBAGE` is on.
 
