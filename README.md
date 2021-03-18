@@ -13,12 +13,13 @@ I hope this simple feature will help you increase your software's performance - 
 
 
 # Usage
-To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp), [MemoryPool.h](MemoryPool.h) & [MemoryPoolData.h](MemoryPoolData.h) files to your project. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
+To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp), [MemoryPool.h](MemoryPool.h) & [MemoryPoolData.h](MemoryPoolData.h) files to your project. The memory pool strcture is `CPPShift::Memory::MemoryPool`. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
 
  * _Create a memory pool_: `CPPShift::Memory::MemoryPool * mp = CPPShift::Memory::MemoryPoolManager::create();` Create a new memory pool structure and a first memory block.
  * _Allocate space_: `Type* allocated = new (mp) Type[size];` Where `Type` is the object\primitive type to create, `mp` is the memory pool structure address, and `size` is a represention of the amount of types to allocate.
  * _Deallocate space_: `CPPShift::Memory::MemoryPoolManager::free(allocated)` Remove an allocated space
  * _Reallocate space_: `Type* allocated = (Type*) CPPShift::Memory::MemoryPoolManager::reallocate(allocated, size);` Rellocate a pre-allocated space, will copy the previous values to the new memory allocated.
+ * _Dump data of a memory pool_: `CPPShift::Memory::MemoryPoolManager::dumpPoolData(mp)` Where `mp` is a pointer to the memory pool structure to dump. This function prints outs the data about the blocks and units in the pool.
 
 ## Macros
 There are some helpful macros available to indicate how you want the MemoryPool to manage your memory allocations.

@@ -81,6 +81,14 @@ namespace CPPShift::Memory {
 		 * @param void* unit_pointer_start Pointer to the object to free
 		 */
 		static void free(void* unit_pointer_start);
+
+		/**
+		 * Dump memory pool meta data of blocks unit to stream. 
+		 * Might be useful for debugging and analyzing memory usage
+		 * 
+		 * @param MemoryPool* mp Memory pool to dump data from
+		 */
+		static void dumpPoolData(MemoryPool* mp);
 	};
 }
 

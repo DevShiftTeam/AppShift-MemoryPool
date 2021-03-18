@@ -19,6 +19,7 @@
  */
 
 #include "MemoryPool.h"
+#include <iostream>
 
 CPPShift::Memory::MemoryPool* CPPShift::Memory::MemoryPoolManager::create(size_t block_size)
 {
@@ -162,6 +163,47 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 	container->lastDeletedUnit = unit;
 #endif // MEMORYPOOL_REUSE_GARBAGE
 }
+
+
+void CPPShift::Memory::MemoryPoolManager::dumpPoolData(MemoryPool* mp)
+{
+	if (mp == NULL) return;
+
+	SMemoryBlockHeader* block = mp->firstBlock;
+	SMemoryUnitHeader* unit;
+	size_t current_unit_offset;
+
+	size_t block_counter = 1;
+	size_t unit_counter = 1;
+
+	while (block != nullptr) {
+		// Dump block data
+		std::cout << "Block " << block_counter << ": " << std::endl;
+		std::cout << "\t" << "Used: " << (float) (block->offset) / (float)(block->blockSize) * 100 << "% " << "(" << block->offset << "/" << block->blockSize << ")" << std::endl;
+
+		if (block->offset == 0) {
+			block = block->next;
+			block_counter++;
+			continue;
+		}
+
+		std::cout << "\t" << "Units: ========================" << std::endl;
+		current_unit_offset = 0;
+		unit_counter = 1;
+		while (current_unit_offset < block->offset) {
+			unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(block + 1) + current_unit_offset);
+			std::cout << "\t\t" << "Unit " << unit_counter << ": " << unit->length + sizeof(SMemoryUnitHeader) << std::endl;
+			current_unit_offset += sizeof(SMemoryUnitHeader) + unit->length;
+			unit_counter++;
+		}
+
+		std::cout << "\t" << "===============================" << std::endl;
+
+		block = block->next;
+		block_counter++;
+	}
+}
+
 
 void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) {
 #ifndef MEMORYPOOL_SAFE_ALLOCATION
