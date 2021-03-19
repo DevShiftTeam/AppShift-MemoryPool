@@ -59,7 +59,7 @@ void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
 	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
 	// Create new block if not enough space
 	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) {
-		mp->currentBlock->next = createMemoryBlock(size);
+		mp->currentBlock->next = createMemoryBlock(size + sizeof(SMemoryUnitHeader));
 		mp->currentBlock->next->mp_container = mp;
 		mp->currentBlock->next->prev = mp->currentBlock;
 		mp->currentBlock = mp->currentBlock->next;
@@ -85,7 +85,7 @@ void* CPPShift::Memory::MemoryPoolManager::allocate_unsafe(MemoryPool* mp, size_
 	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
 	// Create new block if not enough space
 	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) {
-		mp->currentBlock->next = createMemoryBlock(size);
+		mp->currentBlock->next = createMemoryBlock(size + sizeof(SMemoryUnitHeader));
 		mp->currentBlock->next->mp_container = mp;
 		mp->currentBlock = mp->currentBlock->next;
 	}
