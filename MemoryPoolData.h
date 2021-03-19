@@ -40,7 +40,8 @@ namespace CPPShift::Memory {
         size_t blockSize;
         size_t offset;
         MemoryPool* mp_container;
-        SMemoryBlockHeader* next; // The next block
+        SMemoryBlockHeader* next;
+        SMemoryBlockHeader* prev;
     };
 
     // Header of a memory unit in the pool holding important metadata
@@ -51,6 +52,13 @@ namespace CPPShift::Memory {
         SMemoryUnitHeader* prevDeleted;
         bool isDeleted;
 #endif
+    };
+
+    // Header for a scope in memory
+    struct SMemoryScopeHeader {
+        size_t scopeOffset;
+        SMemoryBlockHeader* firstScopeBlock;
+        SMemoryScopeHeader* prevScope;
     };
 
     // A memory representation in memory
@@ -65,10 +73,14 @@ namespace CPPShift::Memory {
                 block_iterator = next_iterator;
             }
         }
-
+        // Data about the memory pool blocks
         SMemoryBlockHeader* firstBlock;
         SMemoryBlockHeader* currentBlock;
         size_t defaultBlockSize;
+
+        // Data about memory scopes
+        SMemoryScopeHeader* currentScope;
+
 #ifdef MEMORYPOOL_REUSE_GARBAGE
         // Holds the last deleted block - used for smart junk memory management
         SMemoryUnitHeader* lastDeletedUnit;
