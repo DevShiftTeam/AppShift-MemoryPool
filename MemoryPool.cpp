@@ -150,10 +150,7 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 		block->offset -= sizeof(SMemoryUnitHeader) + unit->length;
 		block->numberOfAllocated--;
 	}
-	else {
-		block->numberOfDeleted++;
-		unit->isDeleted = true;
-	}
+	else block->numberOfDeleted++;
 
 	// If block offset is 0 remove block if not the only one left
 	if (mp->currentBlock != mp->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {

@@ -6,6 +6,7 @@ I hope this simple feature will help you increase your software's performance - 
 - [MemoryPool For C++](#memorypool-for-c)
 - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
+  - [Memory scoping](#memory-scoping)
   - [Macros](#macros)
 - [Methodology](#methodology)
 - [About](#about)
@@ -21,10 +22,16 @@ To use the memory pool features you just need to copy the [MemoryPool.cpp](Memor
  * _Reallocate space_: `Type* allocated = (Type*) CPPShift::Memory::MemoryPoolManager::reallocate(allocated, size);` Rellocate a pre-allocated space, will copy the previous values to the new memory allocated.
  * _Dump data of a memory pool_: `CPPShift::Memory::MemoryPoolManager::dumpPoolData(mp)` Where `mp` is a pointer to the memory pool structure to dump. This function prints outs the data about the blocks and units in the pool.
 
+## Memory scoping
+Scoping is a fast way to deallocate many allocations at once. If for example you need to allocate more than once in a given part of the code, and then you deallocate all the allocations that happaned, then you can "scope" all these allocations together. it works the same way as a stack in a function scope.
+
+ * _Start A Scope_: `CPPShift::Memory::MemoryPoolManager::startScope(mp)` where mp is the memory pool structure. This function creates a "checkpoint" of the offset and block in the memory pool.
+ * _End A Scope_:  `CPPShift::Memory::MemoryPoolManager::startScope(mp)` Will free all the allocations made after the scope strated.
+ * _Scope Inside A Scope_: You can nest scopes inside scopes by strating a new scope again, just the same way that the stack works with function scopes. Each scope is pointing to the previous one create a chain that allows the memory pool manager to manage scope nesting.
+
 ## Macros
 There are some helpful macros available to indicate how you want the MemoryPool to manage your memory allocations.
  * `#define MEMORYPOOL_DEFAULT_BLOCK_SIZE 1024 * 1024`: The MemoryPool allocates memory into blocks, each block can have a maximum size avalable to use - when it exceeds this size, the MemoryPool allocates a new block - use this macro to define the maximum size to give to each block. By default the value is `1024 * 1024` which is 1MB.
- * `#define MEMORYPOOL_REUSE_GARBAGE`: Deleted space is not really deleted, it is only flagged as 'deleted' - to reuse deleted instances then define this macro and when allocations are requested the memory pool will search for the first big enough deleted block - decreases memory consumption but might effect performance depending on amount of deleted units and how far they are in memory from each other.
  * `#define MEMORYPOOL_SAFE_ALLOCATION`: When allocating with the `new` keyword the system won't check if the memory pool is a null pointer and will trust that it is not, this way checking if the memory pool is not null the job of the developer, but it makes things faster as it is easier for the branch predictor (as I found out through various tests). If this definition is defined then the 'new' keyword will check if the memory pool is null for you and return a `nullptr`.
 
 # Methodology
@@ -35,14 +42,15 @@ Each block contains a block header the size of 32 bytes containing the following
  * `size_t offset;` - Offset in the block from which the memory is free (The block is filled in sequencial order)
  * `MemoryPool* mp_container;` - Pointer to the MemoryPool containing this block - this way it is easy to get information about the MemoryPool structure from the block itself
  * `SMemoryBlockHeader* next;` - Pointer to the next block
+ * `SMemoryBlockHeader* prev;` - Pointer to the previous block
+ * `size_t numberOfAllocated` - Number of units currently allocated in this block. Helps smart garbage collection when block data has been freed.
+ * `size_t numberOfDeleted` - Number of units that have been flaged as deleted. The system removes blocks by comparing the deleted with the allocated.
 
-When a block is fully filled the MemoryPool creates a new block and relates it to the previous block.
+When a block is fully filled the MemoryPool creates a new block and relates it to the previous block, and the previous to the current, them uses the new pool as the current block.
 
-When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 or 32 bytes long (Depending if `MEMORYPOOL_REUSE_GARBAGE` is on, see [Macros](#macros)) and contains the following data:
+When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 bytes long and contains the following data:
  * `size_t length;` - The length in bytes of the allocated space
  * `SMemoryBlockHeader* container` - Block which this unit belongs to
- * `bool isDeleted;` - A flag indicating if the memory unit got deleted
- * `SMemoryUnitHeader* prevDeleted;` - Pointer to the previous deleted memory unit - only if the `MEMORYPOOL_REUSE_GARBAGE` is on.
 
 # About
 - ***Sapir Shemer*** is the proud business owner of [DevShift](devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)

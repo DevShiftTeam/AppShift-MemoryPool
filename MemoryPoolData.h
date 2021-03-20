@@ -55,7 +55,6 @@ namespace CPPShift::Memory {
     struct SMemoryUnitHeader {
         size_t length;
         SMemoryBlockHeader* container;
-        bool isDeleted;
     };
 
     // Header for a scope in memory
