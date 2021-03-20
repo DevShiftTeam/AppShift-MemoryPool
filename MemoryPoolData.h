@@ -80,10 +80,5 @@ namespace CPPShift::Memory {
 
         // Data about memory scopes
         SMemoryScopeHeader* currentScope;
-
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-        // Holds the last deleted block - used for smart junk memory management
-        SMemoryUnitHeader* lastDeletedUnit;
-#endif
     };
 }

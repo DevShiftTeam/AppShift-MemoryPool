@@ -90,6 +90,20 @@ namespace CPPShift::Memory {
 		 * @param MemoryPool* mp Memory pool to dump data from
 		 */
 		static void dumpPoolData(MemoryPool* mp);
+
+		/**
+		 * Start a scope in the memory pool.
+		 * All the allocations between startScope and andScope will be freed.
+		 * It is a very efficient way to free multiple allocations
+		 * 
+		 * @param MemoryPool* mp Memory pool to start the scope in
+		 */
+		static void startScope(MemoryPool* mp);
+
+		/**
+		 * 
+		 */
+		static void endScope(MemoryPool* mp);
 	};
 }
 
