@@ -49,6 +49,8 @@ CPPShift::Memory::SMemoryBlockHeader* CPPShift::Memory::MemoryPoolManager::creat
 	block->mp_container = nullptr;
 	block->next = nullptr;
 	block->prev = nullptr;
+	block->numberOfAllocated = 0;
+	block->numberOfDeleted = 0;
 
 	return block;
 }
@@ -75,6 +77,7 @@ void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(mp->currentBlock) + sizeof(SMemoryBlockHeader) + mp->currentBlock->offset);
 	unit->length = size;
 	unit->container = mp->currentBlock;
+	mp->currentBlock->numberOfAllocated++;
 	mp->currentBlock->offset += sizeof(SMemoryUnitHeader) + size;
 
 	return reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader);
@@ -102,6 +105,7 @@ void* CPPShift::Memory::MemoryPoolManager::allocate_unsafe(MemoryPool* mp, size_
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(mp->currentBlock) + sizeof(SMemoryBlockHeader) + mp->currentBlock->offset);
 	unit->length = size;
 	unit->container = mp->currentBlock;
+	mp->currentBlock->numberOfAllocated++;
 	mp->currentBlock->offset += sizeof(SMemoryUnitHeader) + size;
 
 	return reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader);
@@ -144,11 +148,15 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 	// If last in block, then reset offset
 	if (reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset == reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length) {
 		block->offset -= sizeof(SMemoryUnitHeader) + unit->length;
-		return;
+		block->numberOfAllocated--;
+	}
+	else {
+		block->numberOfDeleted++;
+		unit->isDeleted = true;
 	}
 
 	// If block offset is 0 remove block if not the only one left
-	if (mp->currentBlock != mp->firstBlock && block->offset == 0) {
+	if (mp->currentBlock != mp->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {
 		SMemoryBlockHeader* prev = block->prev;
 		SMemoryBlockHeader* next = block->next;
 		prev->next = next;

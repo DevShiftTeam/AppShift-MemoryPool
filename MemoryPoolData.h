@@ -37,21 +37,25 @@ namespace CPPShift::Memory {
 
     // Header for a single memory block
     struct SMemoryBlockHeader {
+        // Block data
         size_t blockSize;
         size_t offset;
         MemoryPool* mp_container;
+
+        // Movement to other blocks
         SMemoryBlockHeader* next;
         SMemoryBlockHeader* prev;
+
+        // Garbage management data
+        size_t numberOfAllocated;
+        size_t numberOfDeleted;
     };
 
     // Header of a memory unit in the pool holding important metadata
     struct SMemoryUnitHeader {
         size_t length;
         SMemoryBlockHeader* container;
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-        SMemoryUnitHeader* prevDeleted;
         bool isDeleted;
-#endif
     };
 
     // Header for a scope in memory
