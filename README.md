@@ -75,7 +75,7 @@ A scope has it's own structure - it has an offset and a pointer to the starting 
  * `SMemoryScopeHeader* prevScope;` - Pointer to the previous scope/NULL if no parent scope is present.
 
 # Benchmark
-## Windows & CLang
+## Windows & MSVC
 <img src="images/Windows_Benchmark.png"/><br />
 About 8-11 times faster than standard new/delete in each test.
 
