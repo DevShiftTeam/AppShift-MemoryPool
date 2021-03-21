@@ -1,5 +1,5 @@
 /**
- * Memory Pool v1.0.0
+ * CPPShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -17,202 +17,96 @@
  *
  * @author Sapir Shemer
  */
-
 #pragma once
 
+#include "MemoryPoolData.h"
 #include <cstddef>
 #include <memory>
 
-#ifndef MEMORYPOOL_BLOCK_MAX_SIZE
-#define MEMORYPOOL_BLOCK_MAX_SIZE 1024 * 1024
-#endif
+namespace CPPShift::Memory {
+	class MemoryPoolManager {
+	public:
+		/**
+		 * Creates a memory pool structure and initializes it
+		 * 
+		 * @param size_t block_size Defines the default size of a block in the pool, by default uses MEMORYPOOL_DEFAULT_BLOCK_SIZE
+		 * 
+		 * @returns MemoryPool* Pointer to a new memory pool structure
+		 */
+		static MemoryPool* create(size_t block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE);
 
-namespace CPPShift {
-    namespace Memory {
-        // Simple error collection for memory pool
-        enum class EMemoryErrors {
-            CANNOT_CREATE_BLOCK,
-            OUT_OF_POOL,
-            EXCEEDS_MAX_SIZE,
-            CANNOT_CREATE_BLOCK_CHAIN
-        };
+		/**
+		 * Create a new standalone memory block unattached to any memory pool
+		 * 
+		 * @param size_t block_size Defines the default size of a block in the pool, by default uses MEMORYPOOL_DEFAULT_BLOCK_SIZE
+		 * 
+		 * @returns SMemoryBlockHeader* Pointer to the header of the memory block
+		 */
+		static SMemoryBlockHeader* createMemoryBlock(size_t block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE);
 
-        // Header for a single memory block
-        struct SMemoryBlockHeader {
-            size_t block_size;
-            size_t offset;
-            SMemoryBlockHeader* next; // The next block
-        };
+		/**
+		 * Allocates memory in a pool
+		 *
+		 * @param MemoryPool* mp Memory pool to allocate memory in
+		 * @param size_t size Size to allocate in memory pool
+		 *
+		 * @returns void* Pointer to the newly allocate space
+		 */
+		static void* allocate(MemoryPool* mp, size_t size);
 
-        // Header of a memory unit in the pool holding important metadata
-        struct SMemoryUnitHeader {
-            size_t length;
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-            SMemoryUnitHeader* prev_deleted;
-#endif
-            bool is_deleted; // Later used for garbase collection
-        };
 
-        class MemoryPool {
-        private:
-            // Maximum block size
-            size_t maxBlockSize = MEMORYPOOL_BLOCK_MAX_SIZE;
-            // The current block at use
-            SMemoryBlockHeader* currentBlock;
-            // The tail of the block chain
-            SMemoryBlockHeader* firstBlock;
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-            // Holds the last deleted block - used for smart junk memory management
-            SMemoryUnitHeader* lastDeletedUnit;
-#endif
-            SMemoryBlockHeader* createMemoryBlock(size_t block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
-        public:
-            /**
-             * MemoryPool Constructor
-             * 
-             * @param max_block_size Maximum size for a block (MEMORYPOOL_BLOCK_MAX_SIZE by default)
-             * 
-             * @exception EMemoryErrors::CANNOT_CREATE_BLOCK If cannot allocate block in the heap
-             * @exception EMemoryErrors::EXCEEDS_MAX_SIZE If size requested is bigger than MEMORYPOOL_BLOCK_MAX_SIZE and MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE is not defined
-             * 
-             */
-            MemoryPool(size_t max_block_size = MEMORYPOOL_BLOCK_MAX_SIZE);
-            ~MemoryPool();
+		/**
+		 * Allocates memory in a pool without checking that memory pool is not null, 
+		 * this way is unsafe but faster and easier for the branch predictor to use
+		 *
+		 * @param MemoryPool* mp Memory pool to allocate memory in
+		 * @param size_t size Size to allocate in memory pool
+		 *
+		 * @returns void* Pointer to the newly allocate space
+		 */
+		static void* allocate_unsafe(MemoryPool* mp, size_t size);
 
-            /**
-             * Allocates memory in the pool
-             * 
-             * @param size_t number of instances of T to free
-             * 
-             * @returns Pointer to the start of the allocated space
-             */
-            template<typename T>
-            T* allocate(size_t instances = 1);
+		/**
+		 * Re-allocates memory in a pool
+		 *
+		 * @param void* unit_pointer_start Pointer to the object to re-allocate
+		 * @param size_t new_size New size to allocate in memory pool
+		 *
+		 * @returns void* Pointer to the newly allocate space
+		 */
+		static void* reallocate(void* unit_pointer_start, size_t new_size);
 
-            /**
-             * Reallocates memory in the pool
-             * 
-             * @param memory_unit_ptr Pointer to the previously allocated space
-             * @param size_t number of instances of T to free
-             * 
-             * @returns Pointer to the start of the allocated space
-             */
-            template<typename T>
-            T* reallocate(T* memory_unit_ptr, size_t instances = 1);
-            
-            /**
-             * Remove memory unit from the pool
-             * 
-             * @param memory_unit_ptr Pointer to the allocated space to remove
-             */
-            void remove(void* memory_unit_ptr);
-        };
+		/**
+		 * Frees memory in a pool
+		 *
+		 * @param void* unit_pointer_start Pointer to the object to free
+		 */
+		static void free(void* unit_pointer_start);
 
-        template<typename T>
-        inline T* MemoryPool::allocate(size_t instances)
-        {
-            if (instances <= 0) return nullptr;
-            size_t length = instances * sizeof(T);
-            size_t full_length = length + sizeof(SMemoryUnitHeader);
-#ifndef MEMORYPOOL_IGNORE_MAX_BLOCK_SIZE
-            // Check if size exceeds pool size
-            if (full_length > this->maxBlockSize) throw EMemoryErrors::EXCEEDS_MAX_SIZE;
-#endif
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-            // Find big enough deleted block before proceeding
-            SMemoryUnitHeader* temp_deleted_unit = this->lastDeletedUnit;
-            while (temp_deleted_unit != nullptr) {
-                if (temp_deleted_unit->length >= length) {
-                    temp_deleted_unit->is_deleted = false;
-                    this->lastDeletedUnit = temp_deleted_unit->prev_deleted;
-                    return reinterpret_cast<T*>(reinterpret_cast<char*>(temp_deleted_unit) + sizeof(SMemoryUnitHeader));
-                }
-            }
-#endif
-            SMemoryBlockHeader* block = this->currentBlock;
+		/**
+		 * Dump memory pool meta data of blocks unit to stream. 
+		 * Might be useful for debugging and analyzing memory usage
+		 * 
+		 * @param MemoryPool* mp Memory pool to dump data from
+		 */
+		static void dumpPoolData(MemoryPool* mp);
 
-            // New block if necessary
-            if (block->offset + full_length > block->block_size - sizeof(SMemoryBlockHeader)) {
-                // If current not free, create new block
-                block->next = this->createMemoryBlock(
-                    block->offset + full_length > MEMORYPOOL_BLOCK_MAX_SIZE
-                        ? block->offset + full_length : MEMORYPOOL_BLOCK_MAX_SIZE
-                );
-                this->currentBlock = block->next;
-                block = block->next;
-            }
+		/**
+		 * Start a scope in the memory pool.
+		 * All the allocations between startScope and andScope will be freed.
+		 * It is a very efficient way to free multiple allocations
+		 * 
+		 * @param MemoryPool* mp Memory pool to start the scope in
+		 */
+		static void startScope(MemoryPool* mp);
 
-            // Set memory unit header
-            SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
-                reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset
-                );
-            unit->length = length;
-            unit->is_deleted = false;
-#ifdef MEMORYPOOL_REUSE_GARBAGE
-            unit->prev_deleted = nullptr;
-#endif
-            block->offset += full_length;
-            // return offset of new memory unit
-            return reinterpret_cast<T*>(reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader));
-        }
-
-        template<typename T>
-        inline T* MemoryPool::reallocate(T* memory_unit_ptr, size_t instances)
-        {
-            if (memory_unit_ptr == nullptr) return this->allocate<T>(instances);
-            else if (instances == 0) {
-                this->remove(memory_unit_ptr);
-                return nullptr;
-            }
-
-            size_t length = sizeof(T) * instances;
-
-            // Find unit by moving 
-            SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(
-                reinterpret_cast<char*>(memory_unit_ptr) - sizeof(SMemoryUnitHeader)
-            );
-
-            // Check for current block
-            SMemoryBlockHeader* block = this->currentBlock;
-
-            // Avoids branch mispredictions by using a bitwise or
-            char out_right = reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size,
-                out_left = reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader);
-            bool out_of_block = out_right | out_left;
-            
-            // Find in other blocks
-            if (out_of_block)
-            {
-                if (block == this->firstBlock) throw EMemoryErrors::OUT_OF_POOL;
-                block = this->firstBlock;
-
-                while (out_of_block)
-                {
-                    out_right = reinterpret_cast<char*>(unit) > reinterpret_cast<char*>(block) + block->block_size;
-                    out_left = reinterpret_cast<char*>(unit) < reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader);
-                    out_of_block = out_right | out_left;
-
-                    if (block->next == nullptr) throw EMemoryErrors::OUT_OF_POOL;
-                    block = block->next;
-                    if (block == this->currentBlock) block = block->next;
-                }
-            }
-
-            // If unit is the last in the block
-            if (reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length
-                == reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset)
-            {
-                block->offset += length - unit->length;
-                unit->length = length;
-                return memory_unit_ptr;
-            }
-
-            if (unit->length > length) return memory_unit_ptr;
-            void* new_unit = this->allocate<T>(length);
-            memcpy(reinterpret_cast<char*>(new_unit) + sizeof(SMemoryUnitHeader), memory_unit_ptr, unit->length);
-            this->remove(memory_unit_ptr);
-            return reinterpret_cast<T*>(reinterpret_cast<char*>(new_unit) + sizeof(SMemoryUnitHeader));
-        }
-    }
+		/**
+		 * 
+		 */
+		static void endScope(MemoryPool* mp);
+	};
 }
 
+// Override new operators to create with memory pool
+extern void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp);
+extern void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp);

@@ -1,5 +1,5 @@
 /**
- * Memory Pool v1.0.0
+ * CPPShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -22,11 +22,12 @@
 
 #include "MemoryPool.h"
 #include <ostream>
+#include <cstring>
 
 namespace CPPShift {
 	class String {
 	public:
-		String(Memory::MemoryPool& mp, const char * str = "");
+		String(Memory::MemoryPool* mp, const char * str = "");
 		~String();
 
 		char* data() const;
