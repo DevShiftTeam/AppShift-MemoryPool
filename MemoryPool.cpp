@@ -40,7 +40,7 @@ CPPShift::Memory::MemoryPool* CPPShift::Memory::MemoryPoolManager::create(size_t
 CPPShift::Memory::SMemoryBlockHeader* CPPShift::Memory::MemoryPoolManager::createMemoryBlock(size_t block_size)
 {
 	// Create the block
-	SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(std::malloc(sizeof(block) + block_size));
+	SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(std::malloc(sizeof(SMemoryBlockHeader) + block_size));
 	if (block == NULL) throw EMemoryErrors::CANNOT_CREATE_BLOCK;
 
 	// Initalize block data
@@ -57,7 +57,9 @@ CPPShift::Memory::SMemoryBlockHeader* CPPShift::Memory::MemoryPoolManager::creat
 
 void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
 {
-	if (mp == NULL) return nullptr;// If there is enough space in current block then use the current block
+	if (mp == NULL) return nullptr;
+
+	// If there is enough space in current block then use the current block
 	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
 	// Create new block if not enough space
 	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) {
