@@ -14,6 +14,7 @@ I hope this simple feature will help you increase your software's performance - 
   - [Memory Unit (SMemoryUnitHeader)](#memory-unit-smemoryunitheader)
   - [Memory Scope (SMemoryScopeHeader)](#memory-scope-smemoryscopeheader)
 - [Benchmark](#benchmark)
+  - [Windows & CLang](#windows--clang)
   - [Windows & MSVC](#windows--msvc)
   - [MacOS & CLang](#macos--clang)
 - [About](#about)
@@ -75,6 +76,10 @@ A scope has it's own structure - it has an offset and a pointer to the starting 
  * `SMemoryScopeHeader* prevScope;` - Pointer to the previous scope/NULL if no parent scope is present.
 
 # Benchmark
+## Windows & CLang
+<img src="images/Windows_Benchmark_CLang.png"/><br />
+About 16-20 times faster than standard new/delete in each test.
+
 ## Windows & MSVC
 <img src="images/Windows_Benchmark.png"/><br />
 About 8-11 times faster than standard new/delete in each test.
