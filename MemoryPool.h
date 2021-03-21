@@ -43,7 +43,7 @@ namespace CPPShift::Memory {
 		 * 
 		 * @returns SMemoryBlockHeader* Pointer to the header of the memory block
 		 */
-		static SMemoryBlockHeader* createMemoryBlock(size_t block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE);
+		static void createMemoryBlock(MemoryPool*  mp, size_t block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE);
 
 		/**
 		 * Allocates memory in a pool

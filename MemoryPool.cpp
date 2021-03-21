@@ -28,16 +28,15 @@ CPPShift::Memory::MemoryPool* CPPShift::Memory::MemoryPoolManager::create(size_t
 	if (mp == NULL) throw EMemoryErrors::CANNOT_CREATE_MEMORY_POOL;
 
 	// Add first block to memory pool
-	mp->firstBlock = createMemoryBlock(block_size);
-	mp->firstBlock->mp_container = mp;
-	mp->currentBlock = mp->firstBlock;
+	mp->firstBlock = mp->currentBlock = nullptr;
 	mp->defaultBlockSize = block_size;
 	mp->currentScope = nullptr;
+	createMemoryBlock(mp, block_size);
 
 	return mp;
 }
 
-CPPShift::Memory::SMemoryBlockHeader* CPPShift::Memory::MemoryPoolManager::createMemoryBlock(size_t block_size)
+void CPPShift::Memory::MemoryPoolManager::createMemoryBlock(MemoryPool* mp, size_t block_size)
 {
 	// Create the block
 	SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(std::malloc(sizeof(SMemoryBlockHeader) + block_size));
@@ -46,13 +45,21 @@ CPPShift::Memory::SMemoryBlockHeader* CPPShift::Memory::MemoryPoolManager::creat
 	// Initalize block data
 	block->blockSize = block_size;
 	block->offset = 0;
-	block->mp_container = nullptr;
-	block->next = nullptr;
-	block->prev = nullptr;
+	block->mp_container = mp;
 	block->numberOfAllocated = 0;
 	block->numberOfDeleted = 0;
 
-	return block;
+	if (mp->firstBlock != nullptr) {
+		block->next = nullptr;
+		block->prev = mp->currentBlock;
+		mp->currentBlock->next = block;
+		mp->currentBlock = block;
+	}
+	else {
+		block->next = block->prev = nullptr;
+		mp->firstBlock = block;
+		mp->currentBlock = block;
+	}
 }
 
 void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
@@ -62,18 +69,8 @@ void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
 	// If there is enough space in current block then use the current block
 	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
 	// Create new block if not enough space
-	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) {
-		mp->currentBlock->next = createMemoryBlock(size + sizeof(SMemoryUnitHeader));
-		mp->currentBlock->next->mp_container = mp;
-		mp->currentBlock->next->prev = mp->currentBlock;
-		mp->currentBlock = mp->currentBlock->next;
-	}
-	else {
-		mp->currentBlock->next = createMemoryBlock(mp->defaultBlockSize);
-		mp->currentBlock->next->mp_container = mp;
-		mp->currentBlock->next->prev = mp->currentBlock;
-		mp->currentBlock = mp->currentBlock->next;
-	}
+	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) createMemoryBlock(mp, size + sizeof(SMemoryUnitHeader));
+	else createMemoryBlock(mp, mp->defaultBlockSize);
 
 	// Add unit
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(mp->currentBlock) + sizeof(SMemoryBlockHeader) + mp->currentBlock->offset);
@@ -90,18 +87,8 @@ void* CPPShift::Memory::MemoryPoolManager::allocate_unsafe(MemoryPool* mp, size_
 	// If there is enough space in current block then use the current block
 	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
 	// Create new block if not enough space
-	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) {
-		mp->currentBlock->next = createMemoryBlock(size + sizeof(SMemoryUnitHeader));
-		mp->currentBlock->next->mp_container = mp;
-		mp->currentBlock->next->prev = mp->currentBlock;
-		mp->currentBlock = mp->currentBlock->next;
-	}
-	else {
-		mp->currentBlock->next = createMemoryBlock(mp->defaultBlockSize);
-		mp->currentBlock->next->mp_container = mp;
-		mp->currentBlock->next->prev = mp->currentBlock;
-		mp->currentBlock = mp->currentBlock->next;
-	}
+	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) createMemoryBlock(mp, size + sizeof(SMemoryUnitHeader));
+	else createMemoryBlock(mp, mp->defaultBlockSize);
 
 	// Add unit
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(mp->currentBlock) + sizeof(SMemoryBlockHeader) + mp->currentBlock->offset);
