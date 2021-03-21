@@ -9,6 +9,13 @@ I hope this simple feature will help you increase your software's performance - 
   - [Memory scoping](#memory-scoping)
   - [Macros](#macros)
 - [Methodology](#methodology)
+  - [MemoryPool structure (MemoryPool)](#memorypool-structure-memorypool)
+  - [Memory Block (SMemoryBlockHeader)](#memory-block-smemoryblockheader)
+  - [Memory Unit (SMemoryUnitHeader)](#memory-unit-smemoryunitheader)
+  - [Memory Scope (SMemoryScopeHeader)](#memory-scope-smemoryscopeheader)
+- [Benchmark](#benchmark)
+  - [Windows & CLang](#windows--clang)
+  - [MacOS & CLang](#macos--clang)
 - [About](#about)
 - [More to come in later versions](#more-to-come-in-later-versions)
 
@@ -35,9 +42,17 @@ There are some helpful macros available to indicate how you want the MemoryPool 
  * `#define MEMORYPOOL_SAFE_ALLOCATION`: When allocating with the `new` keyword the system won't check if the memory pool is a null pointer and will trust that it is not, this way checking if the memory pool is not null the job of the developer, but it makes things faster as it is easier for the branch predictor (as I found out through various tests). If this definition is defined then the 'new' keyword will check if the memory pool is null for you and return a `nullptr`.
 
 # Methodology
-The MemoryPool is a structure pointing to the start of a chain of blocks, which size is by default `MEMORYPOOL_BLOCK_MAX_SIZE` macro (See [Macros](#macros)) or the size passed into the `CPPShift::Memory::MemoryPoolManager::create(size)` function. The MemoryPoolManager is a component holding the necessary function to work with the MemoryPool structure. What's also good is that you can also access the MemoryPool strcture directly if needed.
+The MemoryPool is a structure pointing to the start of a chain of blocks, which size of every block is by default `MEMORYPOOL_BLOCK_MAX_SIZE` macro (See [Macros](#macros)) or the size passed into the `CPPShift::Memory::MemoryPoolManager::create(size)` function. The MemoryPoolManager is a component holding the necessary functions to work with the MemoryPool structure. What's also good is that you can also access the MemoryPool structure directly if needed.
 
-Each block contains a block header the size of 32 bytes containing the following information:
+## MemoryPool structure (MemoryPool)
+The memory pool structure holds meta-data about the memory space that is allocated and stored in the pool.
+ * `SMemoryBlockHeader* firstBlock;` - Holds the first block in the chain of memory blocks.
+ * `SMemoryBlockHeader* currentBlock;` - Holds the last block in the chain that is used first for allocating (allocations are happening in a stack manner, where each memory unit allocated is on top of the previous one, when a block reaches it's maximum size then a new block is allocated and added to the block chain of the pool).
+ * `size_t defaultBlockSize;` - Default size to use when creating a new block, the size is defined by the `MEMORYPOOL_BLOCK_MAX_SIZE` macro or by passing the `size` as a parameter for the `CPPShift::Memory::MemoryPoolManager::create(size)` function.
+ * `SMemoryScopeHeader* currentScope;` - A pointer to the current scope in the memory pool.
+
+## Memory Block (SMemoryBlockHeader)
+Each block contains a block header the size of 56 bytes containing the following information:
  * `size_t blockSize;` - Size of the block
  * `size_t offset;` - Offset in the block from which the memory is free (The block is filled in sequencial order)
  * `MemoryPool* mp_container;` - Pointer to the MemoryPool containing this block - this way it is easy to get information about the MemoryPool structure from the block itself
@@ -48,9 +63,25 @@ Each block contains a block header the size of 32 bytes containing the following
 
 When a block is fully filled the MemoryPool creates a new block and relates it to the previous block, and the previous to the current, them uses the new pool as the current block.
 
+## Memory Unit (SMemoryUnitHeader)
 When allocating a space, MemoryPool creates a SMemoryUnitHeader and moves the blocks offset forward by the header size plus the amount of space requested. The header is 16 bytes long and contains the following data:
  * `size_t length;` - The length in bytes of the allocated space
  * `SMemoryBlockHeader* container` - Block which this unit belongs to
+
+## Memory Scope (SMemoryScopeHeader)
+A scope has it's own structure - it has an offset and a pointer to the starting block of the scope, and also a pointer to the previous scope (parent).
+ * `size_t scopeOffset;` - Saves the offset of the block when start scope is declared.
+ * `SMemoryBlockHeader* firstScopeBlock;` - Saves the current block when a start scope is declared, helps to know until which block to free everything when the scope ends.
+ * `SMemoryScopeHeader* prevScope;` - Pointer to the previous scope/NULL if no parent scope is present.
+
+# Benchmark
+## Windows & CLang
+<img src="images/Windows_Benchmark.png"/><br />
+About 8-11 times faster than standard new/delete in each test.
+
+## MacOS & CLang
+<img src="images/MacOS_Benchmark.jpg"/><br />
+About 6-9 times faster than standard new/delete in each test.
 
 # About
 - ***Sapir Shemer*** is the proud business owner of [DevShift](devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)
