@@ -34,7 +34,7 @@ int main() {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
             CPPShift::String strs(mp, "The Big World Is Great And Shit"); // Allocation
-            strs += "Some new stuff"; // Rellocation
+            strs += "Some new stuff"; // Re-allocation
         } // Dellocation
         t = clock() - t;
         memavg += (t / (j + 1)) - (memavg / (j + 1));
