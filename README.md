@@ -81,7 +81,7 @@ About 8-11 times faster than standard new/delete in each test.
 
 ## MacOS & CLang
 <img src="images/MacOS_Benchmark.jpg"/><br />
-About 6-9 times faster than standard new/delete in each test.
+About 7-10 times faster than standard new/delete in each test.
 
 # About
 - ***Sapir Shemer*** is the proud business owner of [DevShift](devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)
