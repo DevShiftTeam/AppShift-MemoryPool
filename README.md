@@ -14,7 +14,7 @@ I hope this simple feature will help you increase your software's performance - 
   - [Memory Unit (SMemoryUnitHeader)](#memory-unit-smemoryunitheader)
   - [Memory Scope (SMemoryScopeHeader)](#memory-scope-smemoryscopeheader)
 - [Benchmark](#benchmark)
-  - [Windows & CLang](#windows--clang)
+  - [Windows & MSVC](#windows--msvc)
   - [MacOS & CLang](#macos--clang)
 - [About](#about)
 - [More to come in later versions](#more-to-come-in-later-versions)
