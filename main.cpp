@@ -30,7 +30,7 @@ int main() {
     long double stdavg = 0;
     long double memavg = 0;
 
-    for (long long int j = 0; j < 1000; j++) {
+    for (long long int j = 0; j < 100; j++) {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
             CPPShift::String strs(mp, "The Big World Is Great And Shit"); // Allocation
@@ -42,7 +42,7 @@ int main() {
 
     std::cout << "CPPShift Library: " << memavg << std::endl;
 
-    for (long long int j = 0; j < 1000; j++) {
+    for (long long int j = 0; j < 100; j++) {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
             std::string strs("The Big World Is Great And Shit"); // Allocation

@@ -20,6 +20,7 @@
 #pragma once
 
 #include "MemoryPoolData.h"
+#include <cstring>
 #include <cstddef>
 #include <memory>
 
