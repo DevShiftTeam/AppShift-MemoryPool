@@ -84,7 +84,7 @@ About 8-11 times faster than standard new/delete in each test.
 About 7-10 times faster than standard new/delete in each test.
 
 # About
-- ***Sapir Shemer*** is the proud business owner of [DevShift](devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)
+- ***Sapir Shemer*** is the proud business owner of [DevShift](https://devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)
 
 # More to come in later versions
 In the next versions I'm planning to add some interesting features:
