@@ -24,7 +24,7 @@
 CPPShift::Memory::MemoryPool* CPPShift::Memory::MemoryPoolManager::create(size_t block_size)
 {
 	// Create memory pool
-	MemoryPool* mp = reinterpret_cast<MemoryPool*>(malloc(sizeof(MemoryPool)));
+	MemoryPool* mp = new MemoryPool;
 	if (mp == NULL) throw EMemoryErrors::CANNOT_CREATE_MEMORY_POOL;
 
 	// Add first block to memory pool
