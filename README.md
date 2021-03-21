@@ -18,7 +18,7 @@ I hope this simple feature will help you increase your software's performance - 
   - [Windows & MSVC](#windows--msvc)
   - [MacOS & CLang](#macos--clang)
 - [About](#about)
-- [Contributers - Thank You! :D](#contributers---thank-you-d)
+- [Contributors - Thank You! :D](#contributors---thank-you-d)
 - [More to come in later versions](#more-to-come-in-later-versions)
 
 
@@ -92,11 +92,11 @@ About 7-10 times faster than standard new/delete in each test.
 # About
 - ***Sapir Shemer*** is the proud business owner of [DevShift](https://devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)
 
-# Contributers - Thank You! :D
+# Contributors - Thank You! :D
 A list of people that were kind enough to help:
-- (pwc357)[https://github.com/pwc357]
-- (MyraBaba)[https://github.com/MyraBaba]
-- (LastThought)[https://www.reddit.com/user/LastThought/]
+- [pwc357](https://github.com/pwc357)
+- [MyraBaba](https://github.com/MyraBaba)
+- [LastThought](https://www.reddit.com/user/LastThought/)
 
 # More to come in later versions
 In the next versions I'm planning to add some interesting features:
