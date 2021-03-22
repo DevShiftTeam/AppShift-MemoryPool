@@ -79,15 +79,15 @@ A scope has it's own structure - it has an offset and a pointer to the starting 
 # Benchmark
 ## Windows & CLang
 <img src="images/Windows_Benchmark_CLang.png"/><br />
-About 16-20 times faster than standard new/delete in each test.
+About 19-22 times faster than standard new/delete in each test.
 
 ## Windows & MSVC
 <img src="images/Windows_Benchmark.png"/><br />
-About 8-11 times faster than standard new/delete in each test.
+About 9-12 times faster than standard new/delete in each test.
 
 ## MacOS & CLang
-<img src="images/MacOS_Benchmark.jpg"/><br />
-About 7-10 times faster than standard new/delete in each test.
+<img src="images/MacOS_Benchmark.png"/><br />
+About 8-10 times faster than standard new/delete in each test.
 
 # About
 - ***Sapir Shemer*** is the proud business owner of [DevShift](https://devshift.biz) and an Open-Source enthusiast. Have been programming since the age of 7. Mathematics Student :)

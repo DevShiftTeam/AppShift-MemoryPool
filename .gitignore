@@ -1,5 +1,6 @@
 /out
 */out/
 /.vs
-/CMakeSettings.json
+*/CMakeSettings.json
+CMakeSettings.json
 /build
