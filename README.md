@@ -97,6 +97,7 @@ A list of people that were kind enough to help:
 - [pwc357](https://github.com/pwc357)
 - [MyraBaba](https://github.com/MyraBaba)
 - [LastThought](https://www.reddit.com/user/LastThought/)
+- [azureskydiver](https://github.com/azureskydiver)
 
 # More to come in later versions
 In the next versions I'm planning to add some interesting features:
