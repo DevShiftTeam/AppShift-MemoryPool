@@ -129,9 +129,8 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 
 	// If block offset is 0 remove block if not the only one left
 	if (mp->currentBlock != mp->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {
-		SMemoryBlockHeader* prev = block->prev;
-		SMemoryBlockHeader* next = block->next;
-		prev->next = next;
+		if (block == mp->firstBlock) mp->firstBlock = block->next;
+		else block->prev->next = block->next;
 		if (block == mp->currentBlock) mp->currentBlock = block->prev;
 		std::free(block);
 	}
