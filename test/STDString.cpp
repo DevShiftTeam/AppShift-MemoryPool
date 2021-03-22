@@ -55,13 +55,11 @@ namespace CPPShift {
 	STDString& STDString::operator+=(const char* str)
 	{
 		int add_length = strlen(str);
-		char* prev = this->start;
-		this->start = (char*) realloc(this->start, this->length + add_length);
-		if (this->start == NULL) {
-			this->start = prev;
-			return *this;
-		}
-		memcpy(this->start + this->length, str, add_length);
+		char* str_holder = new char[this->length + add_length];
+		memcpy(str_holder, this->start, this->length);
+		memcpy(str_holder + this->length, str, add_length);
+		delete this->start;
+		this->start = str_holder;
 		this->length += add_length;
 		return *this;
 	}
