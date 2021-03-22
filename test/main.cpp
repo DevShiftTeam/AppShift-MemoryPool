@@ -19,8 +19,9 @@
  */
 
 #include <iostream>
-#include "MemoryPool.h"
+#include "../MemoryPool.h"
 #include "String.h"
+#include "STDString.h"
 #include <time.h>
 
 int main() {
@@ -28,6 +29,7 @@ int main() {
 
     clock_t t;
     long double stdavg = 0;
+    long double ndravg = 0;
     long double memavg = 0;
 
     for (long long int j = 0; j < 100; j++) {
@@ -41,6 +43,18 @@ int main() {
     }
 
     std::cout << "CPPShift Library: " << memavg << std::endl;
+
+    for (long long int j = 0; j < 100; j++) {
+        t = clock();
+        for (int i = 0; i < 1000000; i++) {
+            CPPShift::STDString strs("The Big World Is Great And Shit"); // Allocation
+            strs += "Some new stuff"; // Re-allocation
+        } // Dellocation
+        t = clock() - t;
+        ndravg += (t / (j + 1)) - (ndravg / (j + 1));
+    }
+
+    std::cout << "CPPShift Library with regular new/delete: " << ndravg << std::endl;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();

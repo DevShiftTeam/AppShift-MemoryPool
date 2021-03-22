@@ -20,28 +20,27 @@
 
 #pragma once
 
-#include "MemoryPool.h"
+#include "../MemoryPool.h"
 #include <ostream>
 #include <cstring>
 
 namespace CPPShift {
-	class String {
+	class STDString {
 	public:
-		String(Memory::MemoryPool* mp, const char * str = "");
-		~String();
+		STDString(const char* str = "");
+		~STDString();
 
 		char* data() const;
 		size_t size() const;
 
-		String& operator=(const char* str);
-		friend std::ostream& operator<<(std::ostream& os, const String& dt);
-		String& operator=(const String& str);
-		String& operator+=(const char * str);
-		String& operator+=(const String& str);
+		STDString& operator=(const char* str);
+		friend std::ostream& operator<<(std::ostream& os, const STDString& dt);
+		STDString& operator=(const STDString& str);
+		STDString& operator+=(const char* str);
+		STDString& operator+=(const STDString& str);
 
 	private:
 		char* start;
 		size_t length;
-		Memory::MemoryPool * mp;
 	};
 }
