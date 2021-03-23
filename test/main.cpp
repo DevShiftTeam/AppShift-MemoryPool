@@ -42,7 +42,7 @@ int main() {
         memavg += (t / (j + 1)) - (memavg / (j + 1));
     }
 
-    std::cout << "CPPShift Library: " << memavg << std::endl;
+    std::cout << "CPPShift Library: " << (memavg * 1000) / CLOCKS_PER_SEC << std::endl;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();
@@ -54,7 +54,7 @@ int main() {
         ndravg += (t / (j + 1)) - (ndravg / (j + 1));
     }
 
-    std::cout << "CPPShift Library with regular new/delete: " << ndravg << std::endl;
+    std::cout << "CPPShift Library with regular new/delete: " << (ndravg * 1000) / CLOCKS_PER_SEC << std::endl;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();
@@ -66,6 +66,6 @@ int main() {
         stdavg += (t / (j + 1)) - (stdavg / (j + 1));
     }
 
-    std::cout << "Standard Library: " << stdavg << std::endl;
+    std::cout << "Standard Library: " << (stdavg * 1000) / CLOCKS_PER_SEC << std::endl;
     return 0;
 }
