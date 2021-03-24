@@ -28,9 +28,8 @@ int main() {
     CPPShift::Memory::MemoryPool * mp = CPPShift::Memory::MemoryPoolManager::create();
 
     clock_t t;
-    long double stdavg = 0;
-    long double ndravg = 0;
-    long double memavg = 0;
+    long double benchavg = 0;
+    long double benchavg_new = 0;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();
@@ -39,10 +38,10 @@ int main() {
             strs += "Some new stuff"; // Re-allocation
         } // Dellocation
         t = clock() - t;
-        memavg += (t / (j + 1)) - (memavg / (j + 1));
+        benchavg += (t / (j + 1)) - (benchavg / (j + 1));
     }
 
-    std::cout << "CPPShift Library: " << (memavg * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "CPPShift Library: " << (benchavg * 1000) / CLOCKS_PER_SEC << std::endl;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();
@@ -51,11 +50,13 @@ int main() {
             strs += "Some new stuff"; // Re-allocation
         } // Dellocation
         t = clock() - t;
-        ndravg += (t / (j + 1)) - (ndravg / (j + 1));
+        benchavg_new += (t / (j + 1)) - (benchavg_new / (j + 1));
     }
 
-    std::cout << "CPPShift Library with regular new/delete: " << (ndravg * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "CPPShift Library with regular new/delete: " << (benchavg_new * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "MemoryPool is " << benchavg_new / benchavg << " Times faster than new/delete" << std::endl;
 
+    benchavg = 0;
     for (long long int j = 0; j < 100; j++) {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
@@ -63,9 +64,9 @@ int main() {
             strs += "Some new stuff"; // Rellocation
         } // Dellocation
         t = clock() - t;
-        stdavg += (t / (j + 1)) - (stdavg / (j + 1));
+        benchavg += (t / (j + 1)) - (benchavg / (j + 1));
     }
 
-    std::cout << "Standard Library: " << (stdavg * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "Standard Library: " << (benchavg * 1000) / CLOCKS_PER_SEC << std::endl;
     return 0;
 }
