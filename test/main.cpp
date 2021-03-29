@@ -25,7 +25,7 @@
 #include <time.h>
 
 int main() {
-    CPPShift::Memory::MemoryPool * mp = CPPShift::Memory::MemoryPoolManager::create();
+    CPPShift::Memory::MemoryPool * mp = new CPPShift::Memory::MemoryPool();
 
     clock_t t;
     long double benchavg = 0;

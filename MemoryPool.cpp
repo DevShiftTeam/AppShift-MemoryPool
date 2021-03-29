@@ -21,22 +21,26 @@
 #include "MemoryPool.h"
 #include <iostream>
 
-CPPShift::Memory::MemoryPool* CPPShift::Memory::MemoryPoolManager::create(size_t block_size)
+CPPShift::Memory::MemoryPool::MemoryPool(size_t block_size)
 {
-	// Create memory pool
-	MemoryPool* mp = reinterpret_cast<MemoryPool*>(std::malloc(sizeof(MemoryPool)));
-	if (mp == NULL) throw EMemoryErrors::CANNOT_CREATE_MEMORY_POOL;
-
 	// Add first block to memory pool
-	mp->firstBlock = mp->currentBlock = nullptr;
-	mp->defaultBlockSize = block_size;
-	mp->currentScope = nullptr;
-	createMemoryBlock(mp, block_size);
-
-	return mp;
+	this->firstBlock = this->currentBlock = nullptr;
+	this->defaultBlockSize = block_size;
+	this->currentScope = nullptr;
+	this->createMemoryBlock(block_size);
 }
 
-void CPPShift::Memory::MemoryPoolManager::createMemoryBlock(MemoryPool* mp, size_t block_size)
+CPPShift::Memory::MemoryPool::~MemoryPool() {
+    SMemoryBlockHeader* block_iterator = firstBlock;
+
+    while (block_iterator != nullptr) {
+        SMemoryBlockHeader* next_iterator = block_iterator->next;
+        free(block_iterator);
+        block_iterator = next_iterator;
+    }
+}
+
+void CPPShift::Memory::MemoryPool::createMemoryBlock(size_t block_size)
 {
 	// Create the block
 	SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(std::malloc(sizeof(SMemoryBlockHeader) + block_size));
@@ -45,48 +49,41 @@ void CPPShift::Memory::MemoryPoolManager::createMemoryBlock(MemoryPool* mp, size
 	// Initalize block data
 	block->blockSize = block_size;
 	block->offset = 0;
-	block->mp_container = mp;
 	block->numberOfAllocated = 0;
 	block->numberOfDeleted = 0;
 
-	if (mp->firstBlock != nullptr) {
+	if (this->firstBlock != nullptr) {
 		block->next = nullptr;
-		block->prev = mp->currentBlock;
-		mp->currentBlock->next = block;
-		mp->currentBlock = block;
+		block->prev = this->currentBlock;
+		this->currentBlock->next = block;
+		this->currentBlock = block;
 	}
 	else {
 		block->next = block->prev = nullptr;
-		mp->firstBlock = block;
-		mp->currentBlock = block;
+		this->firstBlock = block;
+		this->currentBlock = block;
 	}
 }
 
-void* CPPShift::Memory::MemoryPoolManager::allocate(MemoryPool* mp, size_t size)
-{
-	if (mp == NULL) return nullptr;
-	return allocate_unsafe(mp, size);
-}
-
-void* CPPShift::Memory::MemoryPoolManager::allocate_unsafe(MemoryPool* mp, size_t size)
+void* CPPShift::Memory::MemoryPool::allocate(size_t size)
 {
 	// If there is enough space in current block then use the current block
-	if (size + sizeof(SMemoryUnitHeader) < mp->currentBlock->blockSize - mp->currentBlock->offset);
+	if (size + sizeof(SMemoryUnitHeader) < this->currentBlock->blockSize - this->currentBlock->offset);
 	// Create new block if not enough space
-	else if (size + sizeof(SMemoryUnitHeader) >= mp->defaultBlockSize) createMemoryBlock(mp, size + sizeof(SMemoryUnitHeader));
-	else createMemoryBlock(mp, mp->defaultBlockSize);
+	else if (size + sizeof(SMemoryUnitHeader) >= this->defaultBlockSize) this->createMemoryBlock(size + sizeof(SMemoryUnitHeader));
+	else this->createMemoryBlock(this->defaultBlockSize);
 
 	// Add unit
-	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(mp->currentBlock) + sizeof(SMemoryBlockHeader) + mp->currentBlock->offset);
+	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(this->currentBlock) + sizeof(SMemoryBlockHeader) + this->currentBlock->offset);
 	unit->length = size;
-	unit->container = mp->currentBlock;
-	mp->currentBlock->numberOfAllocated++;
-	mp->currentBlock->offset += sizeof(SMemoryUnitHeader) + size;
+	unit->container = this->currentBlock;
+	this->currentBlock->numberOfAllocated++;
+	this->currentBlock->offset += sizeof(SMemoryUnitHeader) + size;
 
 	return reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader);
 }
 
-void* CPPShift::Memory::MemoryPoolManager::reallocate(void* unit_pointer_start, size_t new_size)
+void* CPPShift::Memory::MemoryPool::reallocate(void* unit_pointer_start, size_t new_size)
 {
 	if (unit_pointer_start == NULL) return nullptr;
 
@@ -104,21 +101,20 @@ void* CPPShift::Memory::MemoryPoolManager::reallocate(void* unit_pointer_start, 
 	}
 
 	// Allocate new and free previous
-	void* temp_point = allocate_unsafe(block->mp_container, new_size);
+	void* temp_point = this->allocate(new_size);
 	std::memcpy(temp_point, unit_pointer_start, unit->length);
-	free(unit_pointer_start);
+	this->free(unit_pointer_start);
 
 	return temp_point;
 }
 
-void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
+void CPPShift::Memory::MemoryPool::free(void* unit_pointer_start)
 {
 	if (unit_pointer_start == nullptr) return;
 
 	// Find unit
 	SMemoryUnitHeader* unit = reinterpret_cast<SMemoryUnitHeader*>(reinterpret_cast<char*>(unit_pointer_start) - sizeof(SMemoryUnitHeader));
 	SMemoryBlockHeader* block = unit->container;
-	MemoryPool* mp = block->mp_container;
 
 	// If last in block, then reset offset
 	if (reinterpret_cast<char*>(block) + sizeof(SMemoryBlockHeader) + block->offset == reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader) + unit->length) {
@@ -128,20 +124,18 @@ void CPPShift::Memory::MemoryPoolManager::free(void* unit_pointer_start)
 	else block->numberOfDeleted++;
 
 	// If block offset is 0 remove block if not the only one left
-	if (mp->currentBlock != mp->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {
-		if (block == mp->firstBlock) mp->firstBlock = block->next;
+	if (this->currentBlock != this->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {
+		if (block == this->firstBlock) this->firstBlock = block->next;
 		else block->prev->next = block->next;
-		if (block == mp->currentBlock) mp->currentBlock = block->prev;
+		if (block == this->currentBlock) this->currentBlock = block->prev;
 		std::free(block);
 	}
 }
 
 
-void CPPShift::Memory::MemoryPoolManager::dumpPoolData(MemoryPool* mp)
+void CPPShift::Memory::MemoryPool::dumpPoolData()
 {
-	if (mp == NULL) return;
-
-	SMemoryBlockHeader* block = mp->firstBlock;
+	SMemoryBlockHeader* block = this->firstBlock;
 	SMemoryUnitHeader* unit;
 
 	size_t current_unit_offset;
@@ -176,48 +170,40 @@ void CPPShift::Memory::MemoryPoolManager::dumpPoolData(MemoryPool* mp)
 	}
 }
 
-void CPPShift::Memory::MemoryPoolManager::startScope(MemoryPool* mp)
+void CPPShift::Memory::MemoryPool::startScope()
 {
 	// Create new scope, on top of previous if exists
-	if (mp->currentScope == nullptr) {
-		mp->currentScope = new (mp) SMemoryScopeHeader;
-		mp->currentScope->prevScope = nullptr;
+	if (this->currentScope == nullptr) {
+		this->currentScope = new (this) SMemoryScopeHeader;
+		this->currentScope->prevScope = nullptr;
 	}
 	else {
-		SMemoryScopeHeader* new_scope = new (mp) SMemoryScopeHeader;
-		new_scope->prevScope = mp->currentScope;
-		mp->currentScope = new_scope;
+		SMemoryScopeHeader* new_scope = new (this) SMemoryScopeHeader;
+		new_scope->prevScope = this->currentScope;
+		this->currentScope = new_scope;
 	}
 
 	// Simply load the current offset & block to return to when scope ends
-	mp->currentScope->scopeOffset = mp->currentBlock->offset - sizeof(SMemoryScopeHeader) - sizeof(SMemoryUnitHeader);
-	mp->currentScope->firstScopeBlock = mp->currentBlock;
+	this->currentScope->scopeOffset = this->currentBlock->offset - sizeof(SMemoryScopeHeader) - sizeof(SMemoryUnitHeader);
+	this->currentScope->firstScopeBlock = this->currentBlock;
 }
 
-void CPPShift::Memory::MemoryPoolManager::endScope(MemoryPool* mp)
+void CPPShift::Memory::MemoryPool::endScope()
 {
 	// Free all blocks until the start of scope
-	while (mp->currentBlock != mp->currentScope->firstScopeBlock) {
-		mp->currentBlock = mp->currentBlock->prev;
-		std::free(mp->currentBlock->next);
-		mp->currentBlock->next = nullptr;
+	while (this->currentBlock != this->currentScope->firstScopeBlock) {
+		this->currentBlock = this->currentBlock->prev;
+		std::free(this->currentBlock->next);
+		this->currentBlock->next = nullptr;
 	}
 
-	mp->currentBlock->offset = mp->currentScope->scopeOffset;
+	this->currentBlock->offset = this->currentScope->scopeOffset;
 }
 
 void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) {
-#ifndef MEMORYPOOL_SAFE_ALLOCATION
-	return CPPShift::Memory::MemoryPoolManager::allocate_unsafe(mp, size);
-#else
-	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
-#endif // !MEMORYPOOL_SAFE_ALLOCATION
+	return mp->allocate(size);
 }
 
 void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp) {
-#ifndef MEMORYPOOL_SAFE_ALLOCATION
-	return CPPShift::Memory::MemoryPoolManager::allocate_unsafe(mp, size);
-#else
-	return CPPShift::Memory::MemoryPoolManager::allocate(mp, size);
-#endif // !MEMORYPOOL_SAFE_ALLOCATION
+	return mp->allocate(size);
 }

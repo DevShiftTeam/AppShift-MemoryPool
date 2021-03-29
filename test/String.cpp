@@ -30,7 +30,7 @@ namespace CPPShift {
 		this->start[this->length] = '\0';
 	}
 
-	String::~String() { Memory::MemoryPoolManager::free(this->start); }
+	String::~String() { this->mp->free(this->start); }
 
 	char* String::data() const { return this->start; }
 
@@ -38,7 +38,7 @@ namespace CPPShift {
 
 	String& String::operator=(const char* str)
 	{
-		Memory::MemoryPoolManager::free(this->start);
+		this->mp->free(this->start);
 		this->length = strlen(str);
 		this->start = new (this->mp) char[this->length + 1];
 		memcpy(this->start, str, this->length);
@@ -48,7 +48,7 @@ namespace CPPShift {
 
 	String& String::operator=(const String& str)
 	{
-		Memory::MemoryPoolManager::free(this->start);
+		this->mp->free(this->start);
 		this->length = str.size();
 		this->start = new (this->mp) char[this->length + 1];
 		memcpy(this->start, str.data(), this->length);
@@ -59,7 +59,7 @@ namespace CPPShift {
 	String& String::operator+=(const char* str)
 	{
 		int add_length = strlen(str);
-		this->start = (char*) Memory::MemoryPoolManager::reallocate(this->start, this->length + add_length + 1);
+		this->start = (char*) this->mp->reallocate(this->start, this->length + add_length + 1);
 		memcpy(this->start + this->length, str, add_length);
 		this->length += add_length;
 		this->start[this->length] = '\0';
@@ -68,7 +68,7 @@ namespace CPPShift {
 
 	String& String::operator+=(const String& str)
 	{
-		this->start = (char*) Memory::MemoryPoolManager::reallocate(this->start, this->length + str.size() + 1);
+		this->start = (char*) this->mp->reallocate(this->start, this->length + str.size() + 1);
 		memcpy(this->start + this->length, str.data(), str.size());
 		this->length += str.size();
 		this->start[this->length] = '\0';
