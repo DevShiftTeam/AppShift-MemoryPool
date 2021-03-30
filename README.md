@@ -53,7 +53,7 @@ The memory pool structure holds meta-data about the memory space that is allocat
  * `SMemoryScopeHeader* currentScope;` - A pointer to the current scope in the memory pool.
 
 ## Memory Block (SMemoryBlockHeader)
-Each block contains a block header the size of 56 bytes containing the following information:
+Each block contains a block header the size of 48 bytes containing the following information:
  * `size_t blockSize;` - Size of the block
  * `size_t offset;` - Offset in the block from which the memory is free (The block is filled in sequencial order)
  * `SMemoryBlockHeader* next;` - Pointer to the next block
