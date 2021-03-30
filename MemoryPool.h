@@ -77,6 +77,10 @@ namespace CPPShift::Memory {
 		 */
 		void* reallocate(void* unit_pointer_start, size_t new_size);
 
+		// Templated re-allocation
+		template<typename T>
+		T* reallocate(T* unit_pointer_start, size_t new_size);
+
 		/**
 		 * Frees memory in a pool
 		 *
@@ -106,14 +110,18 @@ namespace CPPShift::Memory {
 		 */
 		void endScope();
 	};
+
+	template<typename T>
+	inline T* MemoryPool::allocate(size_t instances) {
+		return reinterpret_cast<T*>(this->allocate(instances * sizeof(T)));
+	}
+
+	template<typename T>
+	inline T* MemoryPool::reallocate(T* unit_pointer_start, size_t instances) {
+		return reinterpret_cast<T*>(this->reallocate(reinterpret_cast<void*>(unit_pointer_start), instances * sizeof(T)));
+	}
 }
 
 // Override new operators to create with memory pool
 extern void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp);
 extern void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp);
-
-
-template<typename T>
-inline T* allocate(size_t instances) {
-	return reinterpret_cast<T*>(this->allocate(instances * sizeof(T)));
-}
