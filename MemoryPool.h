@@ -63,6 +63,10 @@ namespace CPPShift::Memory {
 		 */
 		void* allocate(size_t size);
 
+		// Templated allocation
+		template<typename T>
+		T* allocate(size_t instances);
+
 		/**
 		 * Re-allocates memory in a pool
 		 *
@@ -107,3 +111,9 @@ namespace CPPShift::Memory {
 // Override new operators to create with memory pool
 extern void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp);
 extern void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp);
+
+
+template<typename T>
+inline T* allocate(size_t instances) {
+	return reinterpret_cast<T*>(this->allocate(instances * sizeof(T)));
+}
