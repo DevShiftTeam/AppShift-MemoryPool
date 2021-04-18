@@ -126,8 +126,11 @@ void CPPShift::Memory::MemoryPool::free(void* unit_pointer_start)
 	// If block offset is 0 remove block if not the only one left
 	if (this->currentBlock != this->firstBlock && (block->offset == 0 || block->numberOfAllocated == block->numberOfDeleted)) {
 		if (block == this->firstBlock) this->firstBlock = block->next;
-		else block->prev->next = block->next;
-		if (block == this->currentBlock) this->currentBlock = block->prev;
+		else if (block == this->currentBlock) this->currentBlock = block->prev;
+		else {
+			block->prev->next = block->next;
+			block->next->prev = block->prev;
+		}
 		std::free(block);
 	}
 }
