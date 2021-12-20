@@ -23,7 +23,7 @@ I hope this simple feature will help you increase your software's performance - 
 
 
 # Usage
-To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp), [MemoryPool.h](MemoryPool.h) & [MemoryPoolData.h](MemoryPoolData.h) files to your project. The memory pool structure is `CPPShift::Memory::MemoryPool`. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
+To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp) & [MemoryPool.h](MemoryPool.h) files to your project. The memory pool structure is `CPPShift::Memory::MemoryPool`. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
 
  * _Create a memory pool_: `CPPShift::Memory::MemoryPool * mp = new CPPShift::Memory::MemoryPool(size);` Create a new memory pool structure and a first memory block. If you don't specify a size then by default it will be the `MEMORYPOOL_DEFAULT_BLOCK_SIZE` macro.
  * _Allocate space_: `Type* allocated = new (mp) Type[size];` or `Type* allocated = (Type*) mp->allocate(size * sizeof(Type));` or `Type* allocated = mp->allocate<Type>(size);` Where `Type` is the object\primitive type to create, `mp` is the memory pool object address, and `size` is a represention of the amount of types to allocate.
