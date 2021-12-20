@@ -35,7 +35,7 @@ CPPShift::Memory::MemoryPool::~MemoryPool() {
 
     while (block_iterator != nullptr) {
         SMemoryBlockHeader* next_iterator = block_iterator->next;
-        free(block_iterator);
+        std::free(block_iterator);
         block_iterator = next_iterator;
     }
 }
