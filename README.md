@@ -1,6 +1,6 @@
 # MemoryPool For C++
 A very fast cross-platform memory pool mechanism for C++ built using a data-oriented approach.
-I hope this simple feature will help you increase your software's performance - and there are more projects and features to come under the CPPShift library name, wait for it ;)
+I hope this simple feature will help you increase your software's performance - and there are more projects and features to come under the AppShift library name, wait for it ;)
 
 # Table of Contents
 - [MemoryPool For C++](#memorypool-for-c)
@@ -23,9 +23,9 @@ I hope this simple feature will help you increase your software's performance - 
 
 
 # Usage
-To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp) & [MemoryPool.h](MemoryPool.h) files to your project. The memory pool structure is `CPPShift::Memory::MemoryPool`. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
+To use the memory pool features you just need to copy the [MemoryPool.cpp](MemoryPool.cpp) & [MemoryPool.h](MemoryPool.h) files to your project. The memory pool structure is `AppShift::Memory::MemoryPool`. ***The Memory Pool Is Not Thread Safe - In case of threads it is better to create a memory pool for each thread***
 
- * _Create a memory pool_: `CPPShift::Memory::MemoryPool * mp = new CPPShift::Memory::MemoryPool(size);` Create a new memory pool structure and a first memory block. If you don't specify a size then by default it will be the `MEMORYPOOL_DEFAULT_BLOCK_SIZE` macro.
+ * _Create a memory pool_: `AppShift::Memory::MemoryPool * mp = new AppShift::Memory::MemoryPool(size);` Create a new memory pool structure and a first memory block. If you don't specify a size then by default it will be the `MEMORYPOOL_DEFAULT_BLOCK_SIZE` macro.
  * _Allocate space_: `Type* allocated = new (mp) Type[size];` or `Type* allocated = (Type*) mp->allocate(size * sizeof(Type));` or `Type* allocated = mp->allocate<Type>(size);` Where `Type` is the object\primitive type to create, `mp` is the memory pool object address, and `size` is a represention of the amount of types to allocate.
  * _Deallocate space_: `mp->free(allocated)` Remove an allocated space
  * _Reallocate space_: `Type* allocated = mp->reallocate<Type>(allocated, size);` or `Type* allocated = (Type*) mp->reallocate(allocated, size);` Rellocate a pre-allocated space, will copy the previous values to the new memory allocated.
@@ -43,13 +43,13 @@ There are some helpful macros available to indicate how you want the MemoryPool 
  * `#define MEMORYPOOL_DEFAULT_BLOCK_SIZE 1024 * 1024`: The MemoryPool allocates memory into blocks, each block can have a maximum size avalable to use - when it exceeds this size, the MemoryPool allocates a new block - use this macro to define the maximum size to give to each block. By default the value is `1024 * 1024` which is 1MB.
 
 # Methodology
-The MemoryPool is a structure pointing to the start of a chain of blocks, which size of every block is by default `MEMORYPOOL_BLOCK_MAX_SIZE` macro (See [Macros](#macros)) or the size passed into the `CPPShift::Memory::MemoryPool(size)` constructor. The MemoryPool is an object holding the necessary functions to work with the a memory pool. What's also good is that you can also access the MemoryPool structure data directly if needed (everything is public).
+The MemoryPool is a structure pointing to the start of a chain of blocks, which size of every block is by default `MEMORYPOOL_BLOCK_MAX_SIZE` macro (See [Macros](#macros)) or the size passed into the `AppShift::Memory::MemoryPool(size)` constructor. The MemoryPool is an object holding the necessary functions to work with the a memory pool. What's also good is that you can also access the MemoryPool structure data directly if needed (everything is public).
 
 ## MemoryPool data (MemoryPool)
 The memory pool structure holds meta-data about the memory space that is allocated and stored in the pool.
  * `SMemoryBlockHeader* firstBlock;` - Holds the first block in the chain of memory blocks.
  * `SMemoryBlockHeader* currentBlock;` - Holds the last block in the chain that is used first for allocating (allocations are happening in a stack manner, where each memory unit allocated is on top of the previous one, when a block reaches it's maximum size then a new block is allocated and added to the block chain of the pool).
- * `size_t defaultBlockSize;` - Default size to use when creating a new block, the size is defined by the `MEMORYPOOL_BLOCK_MAX_SIZE` macro or by passing the `size` as a parameter for the `CPPShift::Memory::MemoryPoolManager::create(size)` function.
+ * `size_t defaultBlockSize;` - Default size to use when creating a new block, the size is defined by the `MEMORYPOOL_BLOCK_MAX_SIZE` macro or by passing the `size` as a parameter for the `AppShift::Memory::MemoryPoolManager::create(size)` function.
  * `SMemoryScopeHeader* currentScope;` - A pointer to the current scope in the memory pool.
 
 ## Memory Block (SMemoryBlockHeader)

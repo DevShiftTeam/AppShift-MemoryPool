@@ -1,5 +1,5 @@
 /**
- * CPPShift Memory Pool v2.0.0
+ * AppShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace CPPShift::Memory {
+namespace AppShift::Memory {
 	// Simple error collection for memory pool
     enum class EMemoryErrors {
         CANNOT_CREATE_MEMORY_POOL,
@@ -161,5 +161,5 @@ namespace CPPShift::Memory {
 }
 
 // Override new operators to create with memory pool
-extern void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp);
-extern void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp);
+extern void* operator new(size_t size, AppShift::Memory::MemoryPool* mp);
+extern void* operator new[](size_t size, AppShift::Memory::MemoryPool* mp);

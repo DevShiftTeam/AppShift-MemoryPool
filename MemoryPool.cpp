@@ -1,5 +1,5 @@
 /**
- * CPPShift Memory Pool v2.0.0
+ * AppShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -21,7 +21,7 @@
 #include "MemoryPool.h"
 #include <iostream>
 
-CPPShift::Memory::MemoryPool::MemoryPool(size_t block_size)
+AppShift::Memory::MemoryPool::MemoryPool(size_t block_size)
 {
 	// Add first block to memory pool
 	this->firstBlock = this->currentBlock = nullptr;
@@ -30,7 +30,7 @@ CPPShift::Memory::MemoryPool::MemoryPool(size_t block_size)
 	this->createMemoryBlock(block_size);
 }
 
-CPPShift::Memory::MemoryPool::~MemoryPool() {
+AppShift::Memory::MemoryPool::~MemoryPool() {
     SMemoryBlockHeader* block_iterator = firstBlock;
 
     while (block_iterator != nullptr) {
@@ -40,7 +40,7 @@ CPPShift::Memory::MemoryPool::~MemoryPool() {
     }
 }
 
-void CPPShift::Memory::MemoryPool::createMemoryBlock(size_t block_size)
+void AppShift::Memory::MemoryPool::createMemoryBlock(size_t block_size)
 {
 	// Create the block
 	SMemoryBlockHeader* block = reinterpret_cast<SMemoryBlockHeader*>(std::malloc(sizeof(SMemoryBlockHeader) + block_size));
@@ -65,7 +65,7 @@ void CPPShift::Memory::MemoryPool::createMemoryBlock(size_t block_size)
 	}
 }
 
-void* CPPShift::Memory::MemoryPool::allocate(size_t size)
+void* AppShift::Memory::MemoryPool::allocate(size_t size)
 {
 	// If there is enough space in current block then use the current block
 	if (size + sizeof(SMemoryUnitHeader) < this->currentBlock->blockSize - this->currentBlock->offset);
@@ -83,7 +83,7 @@ void* CPPShift::Memory::MemoryPool::allocate(size_t size)
 	return reinterpret_cast<char*>(unit) + sizeof(SMemoryUnitHeader);
 }
 
-void* CPPShift::Memory::MemoryPool::reallocate(void* unit_pointer_start, size_t new_size)
+void* AppShift::Memory::MemoryPool::reallocate(void* unit_pointer_start, size_t new_size)
 {
 	if (unit_pointer_start == NULL) return nullptr;
 
@@ -108,7 +108,7 @@ void* CPPShift::Memory::MemoryPool::reallocate(void* unit_pointer_start, size_t 
 	return temp_point;
 }
 
-void CPPShift::Memory::MemoryPool::free(void* unit_pointer_start)
+void AppShift::Memory::MemoryPool::free(void* unit_pointer_start)
 {
 	if (unit_pointer_start == nullptr) return;
 
@@ -136,7 +136,7 @@ void CPPShift::Memory::MemoryPool::free(void* unit_pointer_start)
 }
 
 
-void CPPShift::Memory::MemoryPool::dumpPoolData()
+void AppShift::Memory::MemoryPool::dumpPoolData()
 {
 	SMemoryBlockHeader* block = this->firstBlock;
 	SMemoryUnitHeader* unit;
@@ -173,7 +173,7 @@ void CPPShift::Memory::MemoryPool::dumpPoolData()
 	}
 }
 
-void CPPShift::Memory::MemoryPool::startScope()
+void AppShift::Memory::MemoryPool::startScope()
 {
 	// Create new scope, on top of previous if exists
 	if (this->currentScope == nullptr) {
@@ -191,7 +191,7 @@ void CPPShift::Memory::MemoryPool::startScope()
 	this->currentScope->firstScopeBlock = this->currentBlock;
 }
 
-void CPPShift::Memory::MemoryPool::endScope()
+void AppShift::Memory::MemoryPool::endScope()
 {
 	// Free all blocks until the start of scope
 	while (this->currentBlock != this->currentScope->firstScopeBlock) {
@@ -203,10 +203,10 @@ void CPPShift::Memory::MemoryPool::endScope()
 	this->currentBlock->offset = this->currentScope->scopeOffset;
 }
 
-void* operator new(size_t size, CPPShift::Memory::MemoryPool* mp) {
+void* operator new(size_t size, AppShift::Memory::MemoryPool* mp) {
 	return mp->allocate(size);
 }
 
-void* operator new[](size_t size, CPPShift::Memory::MemoryPool* mp) {
+void* operator new[](size_t size, AppShift::Memory::MemoryPool* mp) {
 	return mp->allocate(size);
 }
