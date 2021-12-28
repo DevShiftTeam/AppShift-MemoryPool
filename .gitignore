@@ -5,3 +5,4 @@
 CMakeSettings.json
 /build
 .idea/
+*/cmake-build-*
