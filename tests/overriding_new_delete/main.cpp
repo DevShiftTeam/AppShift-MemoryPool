@@ -1,5 +1,5 @@
 /**
- * CPPShift Memory Pool v2.0.0
+ * AppShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -18,30 +18,11 @@
  * @author Sapir Shemer
  */
 
-#pragma once
+#include <iostream>
+#include "../../MemoryPool.h"
 
-#include "../MemoryPool.h"
-#include <ostream>
-#include <cstring>
+AppShift::Memory::MemoryPool testPool (256 * 1024);
 
-namespace CPPShift {
-	class String {
-	public:
-		String(Memory::MemoryPool* mp, const char * str = "");
-		~String();
-
-		char* data() const;
-		size_t size() const;
-
-		String& operator=(const char* str);
-		friend std::ostream& operator<<(std::ostream& os, const String& dt);
-		String& operator=(const String& str);
-		String& operator+=(const char * str);
-		String& operator+=(const String& str);
-
-	private:
-		char* start;
-		size_t length;
-		Memory::MemoryPool * mp;
-	};
+int main() {
+    return 0;
 }

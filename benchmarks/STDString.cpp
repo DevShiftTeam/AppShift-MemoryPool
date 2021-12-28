@@ -1,5 +1,5 @@
 /**
- * CPPShift Memory Pool v2.0.0
+ * AppShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -20,7 +20,7 @@
 
 #include "STDString.h"
 
-namespace CPPShift {
+namespace AppShift {
 	STDString::STDString(const char* str)
 	{
 		this->length = strlen(str);

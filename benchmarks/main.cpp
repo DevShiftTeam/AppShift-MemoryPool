@@ -1,5 +1,5 @@
 /**
- * CPPShift Memory Pool v2.0.0
+ * AppShift Memory Pool v2.0.0
  *
  * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
  *
@@ -25,7 +25,7 @@
 #include <time.h>
 
 int main() {
-    CPPShift::Memory::MemoryPool * mp = new CPPShift::Memory::MemoryPool();
+    AppShift::Memory::MemoryPool * mp = new AppShift::Memory::MemoryPool();
 
     clock_t t;
     long double benchavg = 0;
@@ -34,26 +34,26 @@ int main() {
     for (long long int j = 0; j < 100; j++) {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
-            CPPShift::String strs(mp, "The Big World Is Great And Shit"); // Allocation
+            AppShift::String strs(mp, "The Big World Is Great And Shit"); // Allocation
             strs += "Some new stuff"; // Re-allocation
         } // Dellocation
         t = clock() - t;
         benchavg += (t / (j + 1)) - (benchavg / (j + 1));
     }
 
-    std::cout << "CPPShift Library: " << (benchavg * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "AppShift Library: " << (benchavg * 1000) / CLOCKS_PER_SEC << std::endl;
 
     for (long long int j = 0; j < 100; j++) {
         t = clock();
         for (int i = 0; i < 1000000; i++) {
-            CPPShift::STDString strs("The Big World Is Great And Shit"); // Allocation
+            AppShift::STDString strs("The Big World Is Great And Shit"); // Allocation
             strs += "Some new stuff"; // Re-allocation
         } // Dellocation
         t = clock() - t;
         benchavg_new += (t / (j + 1)) - (benchavg_new / (j + 1));
     }
 
-    std::cout << "CPPShift Library with regular new/delete: " << (benchavg_new * 1000) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "AppShift Library with regular new/delete: " << (benchavg_new * 1000) / CLOCKS_PER_SEC << std::endl;
     std::cout << "MemoryPool is " << benchavg_new / benchavg << " Times faster than new/delete" << std::endl;
 
     benchavg = 0;
