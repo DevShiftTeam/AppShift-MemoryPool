@@ -3,11 +3,5 @@ project(MemoryPool)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Release mode
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O2")
-
-# Debug mode
-# set(CMAKE_BUILD_TYPE Debug)
-
-add_executable(MemoryPool "main.cpp" "../MemoryPool.cpp")
+# Build all tests
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/advanced_garbage_collection)
