@@ -101,4 +101,5 @@ A list of people that were kind enough to help:
 In the next versions I'm planning to add some interesting features:
 - Ability to put thread safety on the memory pool to make a thread shared memory pool.
 - Ability to create an inter-process memory pool which can be shared between different processes.
-- `compressGarbage()`: Will compress deleted units that are next to eachother into one unit.
+- Simple and Advanced Garbage collection mechanisms
+- Ability to choose mode of operation (full_performance/memory_and_performance/memory), type of pool (segregated/stack) and thread/interprocess safety or no safety at all.
