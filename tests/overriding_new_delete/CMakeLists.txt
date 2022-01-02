@@ -10,4 +10,4 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O2")
 # Debug mode
 # set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(MemoryPool_OND "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../MemoryPool.cpp")
+add_executable(MemoryPool_Test_OND "main.cpp" "../../MemoryPool.cpp")
