@@ -49,18 +49,13 @@ public:
         using other = MemoryPoolAllocator<Type>;
     };
 
-    MemoryPoolAllocator(size_type block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE) noexcept {
+    MemoryPoolAllocator(size_type block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE) {
         mp = new MemoryPool(block_size);
         this->block_size = block_size;
     }
 
-    MemoryPoolAllocator(const MemoryPoolAllocator& alloc) noexcept {
-        mp = new MemoryPool(alloc.block_size);
-        this->block_size = alloc.block_size;
-    }
-
     template<class U>
-    MemoryPoolAllocator(const MemoryPoolAllocator<U>& alloc) noexcept {
+    MemoryPoolAllocator(const MemoryPoolAllocator<U>& alloc) {
         mp = new MemoryPool(alloc.block_size);
         this->block_size = alloc.block_size;
     }
