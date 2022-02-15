@@ -60,6 +60,40 @@ public:
         this->block_size = alloc.block_size;
     }
 
+    template<class U>
+    MemoryPoolAllocator(MemoryPoolAllocator<U>&& alloc) noexcept {
+        mp = alloc.mp;
+        this->block_size = alloc.block_size;
+
+        alloc.mp = nullptr;
+        alloc.block_size = 0;
+    }
+
+    template<class U>
+    MemoryPoolAllocator& operator=(const MemoryPoolAllocator<U>& alloc) {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = new MemoryPool(alloc.block_size);
+            this->block_size = alloc.block_size;
+        }
+        return *this;
+    }
+
+    template<class U>
+    MemoryPoolAllocator& operator=(MemoryPoolAllocator<U>&& alloc) noexcept {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = alloc.mp;
+            this->block_size = alloc.block_size;
+
+            alloc.mp = nullptr;
+            alloc.block_size = 0;
+        }
+        return *this;
+    }
+
     ~MemoryPoolAllocator() {
         delete mp;
     }
