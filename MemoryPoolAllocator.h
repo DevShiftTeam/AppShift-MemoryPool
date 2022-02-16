@@ -14,6 +14,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * @author Valasiadis Fotios
  */
 #pragma once
 
@@ -47,20 +49,49 @@ public:
         using other = MemoryPoolAllocator<Type>;
     };
 
-    MemoryPoolAllocator(size_type block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE) noexcept {
+    MemoryPoolAllocator(size_type block_size = MEMORYPOOL_DEFAULT_BLOCK_SIZE) {
         mp = new MemoryPool(block_size);
         this->block_size = block_size;
     }
 
-    MemoryPoolAllocator(const MemoryPoolAllocator& alloc) noexcept {
+    template<class U>
+    MemoryPoolAllocator(const MemoryPoolAllocator<U>& alloc) {
         mp = new MemoryPool(alloc.block_size);
         this->block_size = alloc.block_size;
     }
 
     template<class U>
-    MemoryPoolAllocator(const MemoryPoolAllocator<U>& alloc) noexcept {
-        mp = new MemoryPool(alloc.block_size);
+    MemoryPoolAllocator(MemoryPoolAllocator<U>&& alloc) noexcept {
+        mp = alloc.mp;
         this->block_size = alloc.block_size;
+
+        alloc.mp = nullptr;
+        alloc.block_size = 0;
+    }
+
+    template<class U>
+    MemoryPoolAllocator& operator=(const MemoryPoolAllocator<U>& alloc) {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = new MemoryPool(alloc.block_size);
+            this->block_size = alloc.block_size;
+        }
+        return *this;
+    }
+
+    template<class U>
+    MemoryPoolAllocator& operator=(MemoryPoolAllocator<U>&& alloc) noexcept {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = alloc.mp;
+            this->block_size = alloc.block_size;
+
+            alloc.mp = nullptr;
+            alloc.block_size = 0;
+        }
+        return *this;
     }
 
     ~MemoryPoolAllocator() {
