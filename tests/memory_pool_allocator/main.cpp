@@ -26,7 +26,7 @@ using namespace AppShift::Memory;
 
 template<class T, class AllocA, class AllocB>
 inline bool operator!=(std::vector<T, AllocA> a, std::vector<T, AllocB> b) {
-    return a.size() != b.size() || std::equal(a.begin(), a.end(), b.begin());
+    return a.size() != b.size() || !std::equal(a.begin(), a.end(), b.begin());
 }
 
 template<class A, class B>
