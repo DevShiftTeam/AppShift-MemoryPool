@@ -20,7 +20,8 @@
 
 #include <iostream>
 #include "../../MemoryPoolAllocator.h"
-#include "bits/stdc++.h"
+#include <vector>
+#include <algorithm>
 
 using namespace AppShift::Memory;
 
