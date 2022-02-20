@@ -31,7 +31,7 @@ inline bool operator!=(std::vector<T, AllocA> a, std::vector<T, AllocB> b) {
 }
 
 template<class A, class B>
-inline void assert_equals(A a, B b, const std::string& message) {
+inline void assert_equals(const A& a,const B& b, const std::string& message) {
     if(a != b) {
         std::cerr << message << '\n';
         std::exit(0);
@@ -70,5 +70,6 @@ int main() {
     test_vector.shrink_to_fit();
     vector.shrink_to_fit();
     assert_equals(test_vector, vector, "shrink to fit test");
-    return 0;
+    
+    assert_equals(alloc, alloc, "equality test");
 }
