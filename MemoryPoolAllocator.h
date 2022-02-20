@@ -31,6 +31,9 @@ class MemoryPoolAllocator {
 
     template<class U>
     friend class MemoryPoolAllocator;
+
+    template<class A, class B>
+    friend bool operator==(const MemoryPoolAllocator<A>&, const MemoryPoolAllocator<B>&);
     
 public:
     using value_type = T;
@@ -164,5 +167,15 @@ public:
         p->~U();
     }
 };
+
+template<class A, class B>
+inline bool operator==(const MemoryPoolAllocator<A>& a, const MemoryPoolAllocator<B>& b) {
+    return a.mp == b.mp;
+}
+
+template<class A, class B>
+inline bool operator!=(const MemoryPoolAllocator<A>& a, const MemoryPoolAllocator<B>& b) {
+    return !(a == b);
+}
 
 }
