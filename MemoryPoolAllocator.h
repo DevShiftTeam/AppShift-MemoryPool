@@ -31,6 +31,9 @@ class MemoryPoolAllocator {
 
     template<class U>
     friend class MemoryPoolAllocator;
+
+    template<class A, class B>
+    friend bool operator==(const MemoryPoolAllocator<A>&, const MemoryPoolAllocator<B>&);
     
 public:
     using value_type = T;
@@ -60,6 +63,11 @@ public:
         this->block_size = alloc.block_size;
     }
 
+    MemoryPoolAllocator(const MemoryPoolAllocator& alloc) {
+        mp = new MemoryPool(alloc.block_size);
+        this->block_size = alloc.block_size;
+    }
+
     template<class U>
     MemoryPoolAllocator(MemoryPoolAllocator<U>&& alloc) noexcept {
         mp = alloc.mp;
@@ -69,8 +77,26 @@ public:
         alloc.block_size = 0;
     }
 
+    MemoryPoolAllocator(MemoryPoolAllocator&& alloc) noexcept {
+        mp = alloc.mp;
+        this->block_size = alloc.block_size;
+
+        alloc.mp = nullptr;
+        alloc.block_size = 0;
+    }
+
     template<class U>
     MemoryPoolAllocator& operator=(const MemoryPoolAllocator<U>& alloc) {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = new MemoryPool(alloc.block_size);
+            this->block_size = alloc.block_size;
+        }
+        return *this;
+    }
+
+    MemoryPoolAllocator& operator=(const MemoryPoolAllocator& alloc) {
         if(this->block_size != alloc.block_size) {
             delete mp;
 
@@ -94,6 +120,19 @@ public:
         return *this;
     }
 
+    MemoryPoolAllocator& operator=(MemoryPoolAllocator&& alloc) noexcept {
+        if(this->block_size != alloc.block_size) {
+            delete mp;
+
+            mp = alloc.mp;
+            this->block_size = alloc.block_size;
+
+            alloc.mp = nullptr;
+            alloc.block_size = 0;
+        }
+        return *this;
+    }
+    
     ~MemoryPoolAllocator() {
         delete mp;
     }
@@ -128,5 +167,15 @@ public:
         p->~U();
     }
 };
+
+template<class A, class B>
+inline bool operator==(const MemoryPoolAllocator<A>& a, const MemoryPoolAllocator<B>& b) {
+    return a.mp == b.mp;
+}
+
+template<class A, class B>
+inline bool operator!=(const MemoryPoolAllocator<A>& a, const MemoryPoolAllocator<B>& b) {
+    return !(a == b);
+}
 
 }
