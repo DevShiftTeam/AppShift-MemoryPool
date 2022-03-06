@@ -1,8 +1,8 @@
 /out
 */out/
-/.vs*
 */CMakeSettings.json
 CMakeSettings.json
-/build
+build
 .idea/
 */cmake-build-*
+.vs*
