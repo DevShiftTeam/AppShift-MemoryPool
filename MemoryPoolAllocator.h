@@ -154,7 +154,7 @@ public:
     }
 
     size_type max_size() const noexcept {
-        return block_size / sizeof(T);
+        return std::numeric_limits<size_type>::max() / sizeof(value_type);
     }
 
     template<class U, class... Args>
