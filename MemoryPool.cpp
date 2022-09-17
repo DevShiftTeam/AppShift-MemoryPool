@@ -131,6 +131,21 @@ void AppShift::Memory::MemoryPool::free(void* unit_pointer_start)
 			block->prev->next = block->next;
 			block->next->prev = block->prev;
 		}
+		
+		if (this->firstBlock->next == block) {
+			this->firstBlock->next = 0;
+		}
+		if (this->firstBlock->prev == block) {
+			this->firstBlock->prev = 0;
+		}
+		if (this->currentBlock->next == block) {
+			this->currentBlock->next = 0;
+		}
+		if (this->currentBlock->prev == block) {
+			this->currentBlock->prev = 0;
+		}
+		
+		
 		std::free(block);
 	}
 }
