@@ -1,4 +1,0 @@
-"/Users/lesscomplexity/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/231.9225.21/CLion.app/Contents/bin/cmake/mac/bin/cmake" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=/Users/lesscomplexity/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/231.9225.21/CLion.app/Contents/bin/ninja/mac/ninja" -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ -G Ninja -S /Users/lesscomplexity/DevShift/AppShift-MemoryPool -B /Users/lesscomplexity/DevShift/AppShift-MemoryPool/cmake-build-debug
--- Configuring done
--- Generating done
--- Build files have been written to: /Users/lesscomplexity/DevShift/AppShift-MemoryPool/cmake-build-debug
