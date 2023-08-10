@@ -1,0 +1,4 @@
+# ninja log v5
+0	466	1691699674039943624	tests/same_size/CMakeFiles/AppShiftPoolTest.dir/__/__/implementation/stack/common.cpp.o	d6f122dac27db446
+1	2153	1691699675722980420	tests/same_size/CMakeFiles/AppShiftPoolTest.dir/main.cpp.o	75634440cfc884aa
+2153	2208	1691699675780543296	tests/same_size/AppShiftPoolTest	5c6b9c3adbfcac6e
