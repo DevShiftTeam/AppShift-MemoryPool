@@ -60,7 +60,7 @@ namespace AppShift::Execution {
          * Pop item from the front of the queue
          * @return
          */
-        const T& pop() {
+        T pop() {
             std::lock_guard<std::mutex> lock(mutex);
             if(isEmpty()) return default_item;
             return array[front++];
