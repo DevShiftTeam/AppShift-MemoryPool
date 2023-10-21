@@ -114,4 +114,4 @@ namespace AppShift::Execution {
         }
     };
 }
-#endif //APPSHIFTPOOL_EVENTLOOPENHANCED_H
+#endif //APPSHIFTPOOL_EVENTLOOP_H
