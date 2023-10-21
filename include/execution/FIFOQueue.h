@@ -11,12 +11,24 @@
 #include <mutex>
 
 namespace AppShift::Execution {
+    /**
+     * The queue block is the header of each block in the queue.
+     * It contains the reference count of the block, and the next block in the chain.
+     * The blocks are connected in a loop, to allow starting the queue from any point in the chain.
+     */
     struct FIFOQueueBlock {
         FIFOQueueBlock* next = this;
         size_t size = 0;
         std::atomic<size_t> ref_count = 0;
     };
 
+    /**
+     * The result of the queue pop operation.
+     * It contains the block of the event, the start index of the event, and the count of the events returned.
+     * This wrapper allows its owner to decrease the reference count of the block when it is no longer needed.
+     *
+     * @tparam T
+     */
     template<typename T>
     struct FIFOQueueResult {
         FIFOQueueResult() {
@@ -59,14 +71,7 @@ namespace AppShift::Execution {
          * @param item
          */
         void push(const T &item) {
-            std::unique_lock<std::mutex> lock(mutex);
-            T* queue;
-            // If empty then reset front and rear
-            // Notice we ignore an empty block if it is in use
-            if(isEmpty() && current_block->ref_count == 0) {
-                rear = 0;
-                front = 0;
-            }
+            std::lock_guard<std::mutex> lock(mutex);
 
             // Handle end of current queue block
             if(rear == current_block->size) {
@@ -89,7 +94,7 @@ namespace AppShift::Execution {
             }
 
             // Add to queue
-            queue = reinterpret_cast<T*>(current_block + 1);
+            auto queue = reinterpret_cast<T*>(current_block + 1);
             queue[rear++] = item;
         }
 
@@ -98,15 +103,12 @@ namespace AppShift::Execution {
          * @return
          */
         FIFOQueueResult<T> pop(size_t count = 1) {
-            std::unique_lock<std::mutex> lock(mutex);
+            std::lock_guard<std::mutex> lock(mutex);
             FIFOQueueResult<T> result;
 
             // If empty then return empty result
-            if(isEmpty()) {
-                result.event_block = nullptr;
-                result.count = 0;
-                return result;
-            }
+            // This ensures the reference count is not increased/decreased, thus doesn't have side effect on push
+            if(isEmpty()) return result;
 
             result.event_block = first_block;
             result.start = front;
