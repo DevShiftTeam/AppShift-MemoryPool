@@ -10,6 +10,8 @@ add_executable(AppShiftPoolTest
 
         # Stack Pool
         ../../implementation/stack/common.cpp
+        ../../implementation/execution/EventLoop.cpp
+        ../../implementation/execution/ExecutionQueue.cpp
 
         LinkedList.h
         main.cpp)
