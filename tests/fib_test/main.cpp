@@ -25,14 +25,14 @@ int main() {
     EventLoop event_loop = EventLoop();
 
     auto start = std::chrono::high_resolution_clock::now();
-    auto result = fib_event_loop(35, event_loop);
+    auto result = fib_event_loop(20, event_loop);
     auto end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Event loop result: " << result << std::endl;
     std::cout << "Event loop time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    result = fib_thread_loop(3, tp);
+    result = fib_thread_loop(20, tp);
     end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Thread pool result: " << result << std::endl;
