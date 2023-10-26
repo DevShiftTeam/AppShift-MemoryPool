@@ -25,7 +25,7 @@ void AppShift::Execution::EventLoop::startEventLoop(size_t thread_count) {
 void AppShift::Execution::EventLoop::stopEventLoop() {
     this->stop_event_loop = true;
 
-    wait([this]() { return !this->execution_queue.isEmpty(); });
+    wait([this]() { return this->execution_queue.isEmpty(); });
 
     for (auto &thread: this->event_loop_threads)
         if (thread.joinable()) thread.join();

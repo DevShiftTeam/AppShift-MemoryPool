@@ -17,13 +17,6 @@ ExecutionQueueResult::~ExecutionQueueResult() {
         event_block->ref_count--;
 }
 
-ExecutionQueueResult::ExecutionQueueResult(ExecutionQueueResult &&other) noexcept {
-    event_block = other.event_block;
-    start = other.start;
-    count = other.count;
-    other.event_block = nullptr;
-}
-
 ExecutionQueue::ExecutionQueue(size_t size) : _size(size) {
     first_block = reinterpret_cast<ExecutionQueueBlock *>(malloc(
             sizeof(ExecutionQueueBlock) + _size * sizeof(Callable)));
