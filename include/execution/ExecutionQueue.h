@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <utility>
 #include <mutex>
+#include <functional>
+#include <atomic>
 
 namespace AppShift::Execution {
     using Callable = std::function<void()>;
@@ -35,9 +37,6 @@ namespace AppShift::Execution {
 
         ExecutionQueueResult();
         ~ExecutionQueueResult();
-
-        // Move constructor
-        ExecutionQueueResult(ExecutionQueueResult &&other) noexcept;
     };
 
     class ExecutionQueue {
@@ -72,7 +71,6 @@ namespace AppShift::Execution {
         size_t front = 0;
         // Mutex
         std::mutex mutex;
-        std::condition_variable condition_variable;
     };
 }
 #endif //APPSHIFTPOOL_EXECUTIONQUEUE_H

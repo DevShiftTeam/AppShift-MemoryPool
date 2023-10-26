@@ -25,7 +25,8 @@ ExecutionQueueResult::ExecutionQueueResult(ExecutionQueueResult &&other) noexcep
 }
 
 ExecutionQueue::ExecutionQueue(size_t size) : _size(size) {
-    first_block = static_cast<ExecutionQueueBlock *>(malloc(sizeof(ExecutionQueueBlock) + _size * sizeof(Callable)));
+    first_block = reinterpret_cast<ExecutionQueueBlock *>(malloc(
+            sizeof(ExecutionQueueBlock) + _size * sizeof(Callable)));
     current_block = first_block;
     first_block->next = first_block;
     first_block->size = _size;
@@ -33,40 +34,39 @@ ExecutionQueue::ExecutionQueue(size_t size) : _size(size) {
 }
 
 void ExecutionQueue::push(const Callable &item) {
-    {
-        std::unique_lock<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-        // Handle end of current queue block
-        if (rear == current_block->size) {
-            auto *next_block = current_block->next;
+    // Handle end of current queue block
+    if (rear == current_block->size) {
+        rear = 0;
+        auto *next_block = current_block->next;
 
-            // If next block is the first block or in use, then allocate new block in between
-            if (next_block == first_block || next_block->ref_count != 0) {
-                auto *new_block = reinterpret_cast<ExecutionQueueBlock *>(
-                        malloc(sizeof(ExecutionQueueBlock) + _size * sizeof(Callable)));
-                new_block->next = next_block;
-                new_block->size = _size;
-                new_block->ref_count = 0;
-                current_block->next = new_block;
-                current_block = new_block;
-            }
-                // Otherwise, just use the next block
-            else {
-                current_block = next_block;
-            }
+        // If next block is the first block or in use, then allocate new block in between
+        if (next_block == first_block || next_block->ref_count != 0) {
+            auto *new_block = reinterpret_cast<ExecutionQueueBlock *>(
+                    malloc(sizeof(ExecutionQueueBlock) + _size * sizeof(Callable)));
+            new_block->next = next_block;
+            new_block->size = _size;
+            new_block->ref_count = 0;
+            current_block->next = new_block;
+            current_block = new_block;
         }
-
-        // Add to queue
-        auto queue = reinterpret_cast<Callable *>(current_block + 1);
-        queue[rear++] = item;
+            // Otherwise, just use the next block
+        else {
+            current_block = next_block;
+        }
     }
-    condition_variable.notify_one();
+
+    // Add to queue
+    auto queue = reinterpret_cast<Callable *>(current_block + 1);
+    queue[rear++] = item;
 }
 
 ExecutionQueueResult ExecutionQueue::pop(size_t count) {
-    std::unique_lock<std::mutex> lock(mutex);
-    condition_variable.wait(lock, [this] { return !isEmpty(); });
+    std::lock_guard<std::mutex> lock(mutex);
     ExecutionQueueResult result;
+
+    if (isEmpty()) return result;
 
     result.event_block = first_block;
     result.start = front;

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <future>
 #include "ExecutionQueue.h"
+#include "BusyPromise.h"
 
 namespace AppShift::Execution {
 /**
@@ -48,6 +49,8 @@ namespace AppShift::Execution {
         template<class Fp, class ...Args>
         auto addEvent(const std::function<Fp> &event, Args... args);
 
+        /// Wait for all events to finish
+        void wait(const std::function<bool()>& condition = []() { return false; });
     private:
         /// Stop signal
         std::atomic<bool> stop_event_loop = false;
@@ -83,20 +86,19 @@ namespace AppShift::Execution {
 
 template<class Fp, class ...Args>
 auto AppShift::Execution::EventLoop::addEvent(const std::function<Fp>& event, Args... args) {
-    using return_type = std::function<Fp>::result_type;
-    std::shared_ptr<std::promise<return_type>> promise = std::make_shared<std::promise<return_type>>();
-    auto future = promise->get_future();
+    using return_type = typename std::function<Fp>::result_type;
+    BusyPromise<return_type> promise = BusyPromise<return_type>(&execution_queue, max_events_per_thread);
 
     execution_queue.push([promise, event, args...]() {
         if constexpr (std::is_same_v<return_type, void>) {
             event(args...);
-            promise->set_value();
+            promise.set_value();
         } else {
-            promise->set_value(event(args...));
+            promise.set_value(event(args...));
         }
     });
 
-    return future;
+    return promise.get_future();
 }
 
 #endif //APPSHIFTPOOL_EVENTLOOP_H
