@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include "LinkedList.h"
-#include "../../include/execution/EventLoop.h"
+#include "../../include/execution/ThreadPool.h"
 #include "../include/tabulate/table.hpp"
 
 using namespace AppShift::Execution;
@@ -38,7 +38,7 @@ auto testPool(POOL& pool, size_t iteration_count, int* randoms_to_remove) {
 auto stdTestMultiThread(size_t iteration_count, int* randoms_to_remove) {
     auto start = std::chrono::steady_clock::now();
     {
-        EventLoop event_loop = EventLoop();
+        ThreadPool event_loop = ThreadPool();
         for (size_t i = 0; i < iteration_count; i++) {
             event_loop.addEvent([randoms_to_remove]() {
                 auto *my_item = createLinkedList<LinkedItemTest>(1000);
@@ -58,7 +58,7 @@ template<class POOL>
 auto testPoolMultiThread(POOL& pool, size_t iteration_count, int* randoms_to_remove) {
     auto start = std::chrono::steady_clock::now();
     {
-        EventLoop event_loop = EventLoop();
+        ThreadPool event_loop = ThreadPool();
         for (size_t i = 0; i < iteration_count; i++) {
             event_loop.addEvent([randoms_to_remove, &pool]() {
                 auto *my_item = createLinkedListInPool<LinkedItemTest>(pool, 1000);

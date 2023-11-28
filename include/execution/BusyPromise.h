@@ -11,26 +11,31 @@ namespace AppShift::Execution {
     template<class T>
     class BusyPromise {
     private:
-        using State_ptr = std::shared_ptr<SharedBusyState<T>>;
-
-        State_ptr _state;
+        std::shared_ptr<SharedBusyState<T>> _state;
         ExecutionQueue* _queue{};
-        size_t _max_events_per_wait = 256;
+        size_t _max_events_per_wait = 1;
 
     public:
-        explicit BusyPromise(ExecutionQueue *queue, size_t _max_events_per_wait = 256)
+        explicit BusyPromise(ExecutionQueue *queue, const size_t _max_events_per_wait = 1)
                 : _queue(queue), _state(std::make_shared<SharedBusyState<T>>())
                 , _max_events_per_wait(_max_events_per_wait) {}
 
         BusyPromise(const BusyPromise<T> &other) {
-            std::lock_guard<std::mutex> lock(other._state->_mutex);
             this->_state = other._state;
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
         }
 
+        // Move constructor
+        BusyPromise(BusyPromise<T> &&other) noexcept {
+            this->_state = std::move(other._state);
+            this->_queue = other._queue;
+            this->_max_events_per_wait = other._max_events_per_wait;
+        }
+
         BusyPromise<T> &operator=(const BusyPromise<T> &other) {
-            std::lock_guard<std::mutex> lock(other._state->_mutex);
+            if(this == &other) return *this;
+
             this->_state = other._state;
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
@@ -42,7 +47,6 @@ namespace AppShift::Execution {
          * @param value
          */
         void set_value(const T &value) const {
-            std::lock_guard<std::mutex> lock(_state->_mutex);
             this->_state->value = value;
             this->_state->is_ready = true;
         }
@@ -52,9 +56,8 @@ namespace AppShift::Execution {
          * @param value
          */
         void set_value(T &&value) const {
-            std::lock_guard<std::mutex> lock(_state->_mutex);
             this->_state->value = std::move(value);
-            this->_state->is_ready = true;
+            this->_state->is_ready.store(true);
         }
 
         /**
@@ -76,7 +79,7 @@ namespace AppShift::Execution {
         size_t _max_events_per_wait = 256;
 
     public:
-        explicit BusyPromise(ExecutionQueue* queue, size_t _max_events_per_wait = 256)
+        explicit BusyPromise(ExecutionQueue* queue, const size_t _max_events_per_wait = 1)
                 : _queue(queue), _state(std::make_shared<SharedBusyState<void>>())
                 , _max_events_per_wait(_max_events_per_wait) {}
 
@@ -87,7 +90,8 @@ namespace AppShift::Execution {
         }
 
         BusyPromise<void> &operator=(const BusyPromise<void> &other) {
-            std::lock_guard<std::mutex> lock(other._state->_mutex);
+            if(this == &other) return *this;
+
             this->_state = other._state;
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
@@ -95,7 +99,6 @@ namespace AppShift::Execution {
         }
 
         BusyPromise<void> &operator=(BusyPromise<void> &&other) noexcept {
-            std::lock_guard<std::mutex> lock(other._state->_mutex);
             this->_state = std::move(other._state);
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;

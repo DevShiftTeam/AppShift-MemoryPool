@@ -12,7 +12,7 @@ include_directories(../include)
 add_executable(AppShiftMatrixTest
 
         # Stack Pool
-        ../../implementation/execution/EventLoop.cpp
+        ../../implementation/execution/ThreadPool.cpp
         ../../implementation/execution/ExecutionQueue.cpp
 
         main.cpp

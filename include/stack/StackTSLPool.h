@@ -14,7 +14,7 @@
 #include <iostream>
 #include <mutex>
 #include "../PoolArchitectures.h"
-#include "../execution/EventLoop.h"
+#include "../execution/ThreadPool.h"
 
 namespace AppShift::Memory {
     /**

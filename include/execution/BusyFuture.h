@@ -10,38 +10,41 @@
 #include "ExecutionQueue.h"
 
 namespace AppShift::Execution {
+    /**
+     * \brief Shared state between future and promise.
+     * STD implementation allocates the state and the value separately.
+     * In contrast, this implementation allocates the state and the value together.
+     *
+     * \tparam T    The type of the value
+     */
     template<class T>
     struct SharedBusyState {
-        T value;
+        T value{};
         std::atomic<bool> is_ready = false;
-        std::mutex _mutex;
-
-        SharedBusyState() = default;
-        SharedBusyState(const SharedBusyState<T> &other) = delete;
-        SharedBusyState(SharedBusyState<T> &&other) noexcept = default;
     };
 
     template<class T>
     class BusyFuture {
     private:
-        using State_ptr = std::shared_ptr<SharedBusyState<T>>;
-
-        State_ptr _state;
-        ExecutionQueue *_queue;
-        size_t _max_events_per_wait = 256;
+        std::shared_ptr<SharedBusyState<T>> _state;
+        ExecutionQueue* _queue;
+        size_t _max_events_per_wait = 1;
 
     public:
-        BusyFuture(State_ptr state, ExecutionQueue *queue, size_t _max_events_per_wait = 256)
-                : _state(state), _queue(queue), _max_events_per_wait(_max_events_per_wait) {}
+        BusyFuture(std::shared_ptr<SharedBusyState<T>> state, ExecutionQueue* queue, const size_t _max_events_per_wait = 1)
+            : _state(state), _queue(queue), _max_events_per_wait(_max_events_per_wait) {
+        }
 
-        BusyFuture<T> &operator=(const BusyFuture<T> &other) {
+        BusyFuture<T>& operator=(const BusyFuture<T>&other) {
+            if (this == &other) return *this;
+
             this->_state = other._state;
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
             return *this;
         }
 
-        BusyFuture<T> &operator=(BusyFuture<T> &&other) noexcept {
+        BusyFuture<T>& operator=(BusyFuture<T>&&other) noexcept {
             this->_state = std::move(other._state);
             this->_queue = std::move(other._queue);
             this->_max_events_per_wait = std::move(other._max_events_per_wait);
@@ -52,9 +55,9 @@ namespace AppShift::Execution {
          * Wait for the future to be ready
          */
         void wait() {
-            while (!this->_state->is_ready) {
-                auto events = this->_queue->pop(this->_max_events_per_wait);
-                std::function<void()> *event_list =
+            while (!this->_state->is_ready.load()) {
+                const auto events = this->_queue->pop(this->_max_events_per_wait, true);
+                const std::function<void()>* event_list =
                         &reinterpret_cast<std::function<void()> *>(events.event_block + 1)[events.start];
                 for (size_t i = 0; i < events.count; i++)
                     event_list[i]();
@@ -75,14 +78,13 @@ namespace AppShift::Execution {
          * @return
          */
         bool isReady() {
-            return this->_state->is_ready;
+            return this->_state->is_ready.load();
         }
     };
 
     template<>
     struct SharedBusyState<void> {
         std::atomic<bool> is_ready = false;
-        std::mutex _mutex;
     };
 
     template<>
@@ -92,20 +94,21 @@ namespace AppShift::Execution {
 
         State_ptr _state;
         ExecutionQueue* _queue;
-        size_t _max_events_per_wait = 256;
+        size_t _max_events_per_wait = 1;
 
     public:
-        BusyFuture(State_ptr state, ExecutionQueue *queue, size_t _max_events_per_wait = 256)
-                : _state(std::move(state)), _queue(queue), _max_events_per_wait(_max_events_per_wait) {}
+        BusyFuture(State_ptr state, ExecutionQueue* queue, const size_t _max_events_per_wait = 1)
+            : _state(std::move(state)), _queue(queue), _max_events_per_wait(_max_events_per_wait) {
+        }
 
-        BusyFuture<void> &operator=(const BusyFuture<void> &other) {
+        BusyFuture<void>& operator=(const BusyFuture<void>&other) {
             this->_state = other._state;
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
             return *this;
         }
 
-        BusyFuture<void> &operator=(BusyFuture<void> &&other) noexcept {
+        BusyFuture<void>& operator=(BusyFuture<void>&&other) noexcept {
             this->_state = std::move(other._state);
             this->_queue = other._queue;
             this->_max_events_per_wait = other._max_events_per_wait;
@@ -115,10 +118,10 @@ namespace AppShift::Execution {
         /**
          * Wait for the future to be ready
          */
-        void wait() {
+        void wait() const {
             while (!this->_state->is_ready) {
-                auto events = this->_queue->pop(this->_max_events_per_wait);
-                std::function<void()> *event_list =
+                const auto events = this->_queue->pop(this->_max_events_per_wait, true);
+                const std::function<void()>* event_list =
                         &reinterpret_cast<std::function<void()> *>(events.event_block + 1)[events.start];
                 for (size_t i = 0; i < events.count; i++)
                     event_list[i]();
@@ -137,7 +140,7 @@ namespace AppShift::Execution {
          * Check if the future is ready
          * @return
          */
-        bool isReady() {
+        [[nodiscard]] bool isReady() const {
             return this->_state->is_ready;
         }
     };

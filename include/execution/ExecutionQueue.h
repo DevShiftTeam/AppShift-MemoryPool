@@ -10,6 +10,7 @@
 #include <mutex>
 #include <functional>
 #include <atomic>
+#include <iostream>
 
 namespace AppShift::Execution {
     using Callable = std::function<void()>;
@@ -53,14 +54,19 @@ namespace AppShift::Execution {
          * Pop item from the front of the queue
          * @return
          */
-        ExecutionQueueResult pop(size_t count = 1);
+        ExecutionQueueResult pop(size_t count = 1, bool continue_if_empty = false);
 
         /**
          * Check if queue is empty
          * @return
          */
-        bool isEmpty() {
+        [[nodiscard]] bool isEmpty() const {
             return front == rear && first_block == current_block;
+        }
+
+        void setContinueEvenIfEmpty(const bool value) {
+            continue_even_if_empty.store(value);
+            condition_variable.notify_all();
         }
 
     private:
@@ -71,6 +77,10 @@ namespace AppShift::Execution {
         size_t front = 0;
         // Mutex
         std::mutex mutex;
+        // Condition variable
+        std::condition_variable condition_variable;
+        // Atomic flag reference to indicate if the queue is stoping
+        std::atomic<bool> continue_even_if_empty = false;
     };
 }
 #endif //APPSHIFTPOOL_EXECUTIONQUEUE_H

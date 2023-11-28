@@ -1,40 +1,43 @@
 //
 // Created by Sapir Shemer on 25/10/2023.
 //
-#include "../../include/execution/EventLoop.h"
-#include "../include/thread_pool/thread_pool.h"
+#include "../../include/execution/ThreadPool.h"
+
 
 using namespace AppShift::Execution;
 
-int fib_event_loop(int n, EventLoop& event_loop) {
+int fib_event_loop(const int n, ThreadPool& event_loop) {
     if(n <= 1) return n;
-    auto a = event_loop.addEvent<int(int, EventLoop&)>(fib_event_loop, n - 1, std::ref(event_loop));
-    auto b = event_loop.addEvent<int(int, EventLoop&)>(fib_event_loop, n - 2, std::ref(event_loop));
-    return a.get() + b.get();
+    auto a = fib_event_loop(n - 1, event_loop);
+    auto b = event_loop.addPromise(fib_event_loop, n - 2, std::ref(event_loop));
+    return a + b.get();
 }
 
-int fib_thread_loop(int n, dp::thread_pool<> &tp) {
+int fib(const int n) {
     if(n <= 1) return n;
-    auto a = tp.enqueue<int(int, dp::thread_pool<>&)>(fib_thread_loop, n - 1, std::ref(tp));
-    auto b = tp.enqueue<int(int, dp::thread_pool<>&)>(fib_thread_loop, n - 2, std::ref(tp));
-    return a.get() + b.get();
+    auto a = fib(n - 1);
+    auto b = fib(n - 2);
+    return a + b;
 }
 
 int main() {
-    dp::thread_pool tp = dp::thread_pool();
-    EventLoop event_loop = EventLoop();
+    {
+        ThreadPool event_loop = ThreadPool();
 
-    auto start = std::chrono::high_resolution_clock::now();
-    auto result = fib_event_loop(20, event_loop);
-    auto end = std::chrono::high_resolution_clock::now();
+        const auto start = std::chrono::high_resolution_clock::now();
+        const auto result = fib_event_loop(30, event_loop);
+        const auto end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Event loop result: " << result << std::endl;
-    std::cout << "Event loop time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+        std::cout << "Event loop result: " << result << std::endl;
+        std::cout << "Event loop time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    }
 
-    start = std::chrono::high_resolution_clock::now();
-    result = fib_thread_loop(20, tp);
-    end = std::chrono::high_resolution_clock::now();
+    {
+        const auto start = std::chrono::high_resolution_clock::now();
+        const auto result = fib(30);
+        const auto end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Thread pool result: " << result << std::endl;
-    std::cout << "Thread pool time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+        std::cout << "Async result: " << result << std::endl;
+        std::cout << "Async time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    }
 }
