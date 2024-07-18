@@ -102,3 +102,7 @@ In the next versions I'm planning to add some interesting features:
 - Ability to put thread safety on the memory pool to make a thread shared memory pool.
 - Ability to create an inter-process memory pool which can be shared between different processes.
 - `compressGarbage()`: Will compress deleted units that are next to eachother into one unit.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=DevShiftTeam/AppShift-MemoryPool&type=Date)](https://star-history.com/#DevShiftTeam/AppShift-MemoryPool&Date)
